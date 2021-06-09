@@ -70,185 +70,142 @@ def keep_only_given_class(to_keep=[], input_data=[], input_labels=[]):
 ########################################################
 
 # Load lotus
-df_meta = pd.read_csv('../../data/processed/210523_frozen_metadata.csv.gz', sep=",")
-
-# Fill NaN with 'Unknown'
-values = {'organism_taxonomy_02kingdom': 'Not attributed (Bacteria and Algae)', 'organism_taxonomy_03phylum': 'Unknown',
-          'organism_taxonomy_04class': 'Unknown',
-          'organism_taxonomy_05order': 'Unknown', 'organism_taxonomy_06family': 'Unknown',
-          'organism_taxonomy_08genus': 'Unknown', 'organism_taxonomy_09species': 'Unknown'}
-df_meta.fillna(value=values, inplace=True)
+df_meta = pd.read_csv(
+    '210523_lotus_dnp_metadata.csv',
+    usecols=['structure_smiles_2D', 'structure_taxonomy_npclassifier_01pathway',
+    'structure_taxonomy_npclassifier_02superclass', 'structure_taxonomy_npclassifier_03class', 
+    'structure_taxonomy_classyfire_01kingdom', 'structure_taxonomy_classyfire_02superclass', 
+    'structure_taxonomy_classyfire_03class'],
+    sep=",")
 
 # Keep only 1 occurence of structure - biosource pair
 df_meta = df_meta.drop_duplicates(
-    subset=['structure_wikidata', 'organism_taxonomy_02kingdom', 'organism_taxonomy_03phylum',
-            'organism_taxonomy_04class',
-            'organism_taxonomy_05order', 'organism_taxonomy_06family', 'organism_taxonomy_08genus',
-            'organism_taxonomy_09species'])
-
-# Group by structure and return for each taxonomical level the most frequent taxa, its occurence and the number of unique taxa
-df_gb = df_meta.groupby('structure_wikidata').agg(
-    {'structure_inchi': 'first',
-     'structure_inchikey': 'first',
-     'structure_smiles': 'first',
-     'structure_smiles_2D': 'first',
-     'structure_taxonomy_npclassifier_01pathway': 'first',
-     'structure_taxonomy_npclassifier_02superclass': 'first',
-     'structure_taxonomy_npclassifier_03class': 'first',
-     'structure_taxonomy_classyfire_01kingdom': 'first',
-     'structure_taxonomy_classyfire_02superclass': 'first',
-     'structure_taxonomy_classyfire_03class': 'first',
-     'structure_taxonomy_classyfire_04directparent': 'first',
-    #  'organism_taxonomy_02kingdom': [lambda x: pd.Series.mode(x), lambda x: x.value_counts().head(1), 'count',
-    #                                  'nunique', lambda x: Counter(x)],
-    #  'organism_taxonomy_03phylum': [lambda x: pd.Series.mode(x), lambda x: x.value_counts().head(1),
-    #                                 'nunique', lambda x: Counter(x)],
-    #  'organism_taxonomy_04class': [lambda x: pd.Series.mode(x), lambda x: x.value_counts().head(1),
-    #                                'nunique', lambda x: Counter(x)],
-    #  'organism_taxonomy_05order': [lambda x: pd.Series.mode(x), lambda x: x.value_counts().head(1),
-    #                                'nunique', lambda x: Counter(x)],
-    #  'organism_taxonomy_06family': [lambda x: pd.Series.mode(x), lambda x: x.value_counts().head(1),
-    #                                 'nunique', lambda x: Counter(x)],
-    #  'organism_taxonomy_08genus': [lambda x: pd.Series.mode(x), lambda x: x.value_counts().head(1),
-    #                                'nunique', lambda x: Counter(x)],
-    #  'organism_taxonomy_09species': [lambda x: pd.Series.mode(x), lambda x: x.value_counts().head(1),
-    #                                  'nunique', lambda x: Counter(x)],
-     })
-
-del (df_meta)
-
-# df_gb.columns = ['_'.join(col).strip() for col in df_gb.columns.values]
-
-# df_gb.rename(columns={"organism_taxonomy_02kingdom_count": "biosource_count"}, inplace=True)
-
-# taxo_cols = ['organism_taxonomy_02kingdom', 'organism_taxonomy_03phylum', 'organism_taxonomy_04class',
-#              'organism_taxonomy_05order', 'organism_taxonomy_06family', 'organism_taxonomy_08genus',
-#              'organism_taxonomy_09species']
-
-# bins = [0, 2, 6, 21, np.inf]
-# names = ['1 unique biosource', '2-5 unique biosources', '6-20 unique biosources', '>20 unique biosources']
-
-# for col in taxo_cols:
-#     df_gb[col + '_<lambda_0>'] = df_gb[col + '_<lambda_0>'].astype(str)
-#     df_gb[col + '_specificity'] = df_gb[col + '_<lambda_1>'] / df_gb['biosource_count']
-#     df_gb.drop([col + '_<lambda_1>'], axis=1, inplace=True)
-#     df_gb[col + '_nunique_cat'] = pd.cut(df_gb[col + '_nunique'], bins, labels=names, right=False)
-
-# names = ['1 biosource', '2-5 biosources', '6-20 biosources', '>20 biosources']
-# df_gb['biosource_count_cat'] = pd.cut(df_gb.biosource_count, bins, labels=names, right=False)
-
-# df_gb.reset_index(inplace=True)
-
-# df_gb["id_wikidata"] = df_gb['structure_wikidata'].str[31:]
-
-values = {'structure_taxonomy_npclassifier_01pathway_first': 'Unknown',
-          'structure_taxonomy_npclassifier_02superclass_first': 'Unknown',
-          'structure_taxonomy_npclassifier_03class_first': 'Unknown',
-          'structure_taxonomy_classyfire_01kingdom_first': 'Unknown',
-          'structure_taxonomy_classyfire_02superclass_first': 'Unknown',
-          'structure_taxonomy_classyfire_03class_first': 'Unknown',
-          'structure_taxonomy_classyfire_04directparent_first': 'Unknown'}
-df_gb.fillna(value=values, inplace=True)
-
-# # Generating mean specificity score by taxonomical level and class, with a minimal score for plotting, set it to 0 not to use it. 
-
-# dic_mean_specificity = {
-#     'organism_taxonomy_02kingdom': {'min': 0},
-#     'organism_taxonomy_06family': {'min': 0},
-#     'organism_taxonomy_08genus': {'min': 0},
-# }
-# structure_taxo = ['structure_taxonomy_npclassifier_01pathway_first',
-#                   'structure_taxonomy_npclassifier_02superclass_first',
-#                   'structure_taxonomy_npclassifier_03class_first']
-
-# for dic in dic_mean_specificity:
-#     for level in structure_taxo:
-#         print(str(dic)+'_<lambda_2>')
-#         df_gb['counter_sum'] = df_gb.groupby(by = [level])[str(dic)+'_<lambda_2>'].transform('sum')
-#         df_gb['counter_sum_values'] = df_gb['counter_sum'].apply(lambda x: sum(x.values()))
-#         df_gb['counter_sum'] = df_gb['counter_sum'].apply(lambda x: x.most_common(1)[0])
-#         df_gb['specificity_taxon'] = df_gb['counter_sum'].apply(lambda x: x[0])
-#         df_gb['specificity_score'] = df_gb['counter_sum'].apply(lambda x: x[1])
-#         df_gb['specificity_score'] = df_gb['specificity_score']/df_gb['counter_sum_values']
-
-#         dic_mean_specificity[dic][level+'_score'] = df_gb['specificity_score']
-#         dic_mean_specificity[dic][level+'_taxon'] = df_gb['specificity_taxon']
-
-#         df_gb.drop(['counter_sum', 'counter_sum_values','specificity_taxon', 'specificity_score'], axis=1, inplace=True)
+    subset=['structure_smiles_2D'])
 
 ########################################################
-###           PART 2: LOAD anotations                ###
+###           PART 2: LOAD annotations               ###
 ########################################################
 
-# Load lotus
-df_annotations = pd.read_csv('../../data/processed/210523_frozen_metadata.csv.gz', sep=",")
+# Load annotations
+df_annotations = pd.read_csv('Table_PF_pos_190905.csv', usecols=['CRC_Number_DNP', 'Smiles_DNP'], low_memory=False, sep=",")
+
+df_annotations['Smiles'] = df_annotations['Smiles_DNP'].str.split('|').str[0]
+df_annotations['CRC_Number_DNP'] = df_annotations['CRC_Number_DNP'].str.split('|').str[0]
+df_annotations.dropna(subset=['Smiles'], inplace=True)
+
+anisomeric_smiles = []
+inchikey = []
+for i, row in df_annotations.iterrows():
+    mol = AllChem.MolFromSmiles(row["Smiles"])
+    if mol != None:
+        aniso_smiles = AllChem.MolToSmiles(mol, isomericSmiles = False)
+        ik = AllChem.MolToInchiKey(mol)
+        anisomeric_smiles.append(aniso_smiles)
+        inchikey.append(ik)
+    else:
+        anisomeric_smiles.append(np.nan)
+        inchikey.append(aniso_smiles)
+
+df_annotations['anisomeric_smiles'] = anisomeric_smiles
+df_annotations['inchikey'] = inchikey
+df_annotations['inchikey_2D'] = df_annotations['inchikey'].str[:14]
+
+df_annotations = df_annotations.drop_duplicates(
+    subset=['inchikey_2D'])
+    
+df_annotations.dropna(subset=['anisomeric_smiles'], inplace=True)
+
+df_annotations.drop(['Smiles', 'Smiles_DNP'], axis=1, inplace=True)
+
+print('Number of unique annotations (2D structures): ' + str(len(df_annotations)))
+
+# Load classyfire classes for DNP annotations:
+
+df_classes_dnp = pd.read_csv('190602_DNP_TAXcof_CF.tsv', sep='\t', usecols= ['CRC_Number_DNP', 'Kingdom_cf_DNP', 'Superclass_cf_DNP', 'Class_cf_DNP'])
+df_classes_dnp.drop_duplicates(subset='CRC_Number_DNP', inplace=True)
+
+df_annotations = df_annotations.merge(df_classes_dnp, on = 'CRC_Number_DNP', how ='left')
+df_annotations.drop(['CRC_Number_DNP'], axis=1, inplace=True)
 
 
+# Merge both tables:
+
+anisomeric_smiles = []
+inchikey = []
+for i, row in df_meta.iterrows():
+    mol = AllChem.MolFromSmiles(row["structure_smiles_2D"])
+    if mol != None:
+        ik = AllChem.MolToInchiKey(mol)
+        inchikey.append(ik)
+    else:
+        anisomeric_smiles.append(np.nan)
+        inchikey.append(aniso_smiles)
+
+df_meta['inchikey'] = inchikey
+df_meta['inchikey_2D'] = df_meta['inchikey'].str[:14]
+df_meta = df_meta.drop_duplicates(
+    subset=['inchikey_2D'])
+
+
+df_merged = pd.merge(df_meta, df_annotations, left_on = 'inchikey_2D', right_on='inchikey_2D', how='outer')
+df_merged['is_annotated'] = np.where(df_merged['anisomeric_smiles'].isnull(), 'no', 'yes')
+
+df_merged['structure_smiles_2D'].fillna(df_merged['anisomeric_smiles'], inplace=True)
+df_merged['structure_taxonomy_classyfire_01kingdom'].fillna(df_merged['Kingdom_cf_DNP'], inplace=True)
+df_merged['structure_taxonomy_classyfire_02superclass'].fillna(df_merged['Superclass_cf_DNP'], inplace=True)
+df_merged['structure_taxonomy_classyfire_03class'].fillna(df_merged['Class_cf_DNP'], inplace=True)
+
+df_merged.drop(['anisomeric_smiles', 'Kingdom_cf_DNP', 'Superclass_cf_DNP', 'Class_cf_DNP'], axis=1, inplace=True)
+
+values = {
+    # 'structure_taxonomy_npclassifier_01pathway_first': 'Unknown',
+    # 'structure_taxonomy_npclassifier_02superclass_first': 'Unknown',
+    # 'structure_taxonomy_npclassifier_03class_first': 'Unknown',
+    'structure_taxonomy_classyfire_01kingdom': 'Unknown',
+    'structure_taxonomy_classyfire_02superclass': 'Unknown',
+    'structure_taxonomy_classyfire_03class': 'Unknown',
+          }
+df_merged.fillna(value=values, inplace=True)
 
 # Generating class for plotting
 dic_categories = {
-    'structure_taxonomy_npclassifier_01pathway_first': {'Ncat': 19},
-    "structure_taxonomy_npclassifier_02superclass_first": {'Ncat': 19},
-    "structure_taxonomy_npclassifier_03class_first": {'Ncat': 19},
-    "structure_taxonomy_classyfire_01kingdom_first": {'Ncat': 0},
-    "structure_taxonomy_classyfire_02superclass_first": {'Ncat': 19},
-    "structure_taxonomy_classyfire_03class_first": {'Ncat': 19},
-    "structure_taxonomy_classyfire_04directparent_first": {'Ncat': 19},
-    "organism_taxonomy_02kingdom_<lambda_0>": {'Ncat': 19},
-    "organism_taxonomy_03phylum_<lambda_0>": {'Ncat': 19},
-    "organism_taxonomy_04class_<lambda_0>": {'Ncat': 19},
-    "organism_taxonomy_05order_<lambda_0>": {'Ncat': 19},
-    "organism_taxonomy_06family_<lambda_0>": {'Ncat': 19},
-    "organism_taxonomy_08genus_<lambda_0>": {'Ncat': 19},
-    "organism_taxonomy_09species_<lambda_0>": {'Ncat': 19},
-    "biosource_count_cat": {'Ncat': 0},
-    "organism_taxonomy_02kingdom_nunique_cat": {'Ncat': 0},
-    "organism_taxonomy_03phylum_nunique_cat": {'Ncat': 0},
-    "organism_taxonomy_04class_nunique_cat": {'Ncat': 0},
-    "organism_taxonomy_05order_nunique_cat": {'Ncat': 0},
-    "organism_taxonomy_06family_nunique_cat": {'Ncat': 0},
-    "organism_taxonomy_08genus_nunique_cat": {'Ncat': 0},
-    "organism_taxonomy_09species_nunique_cat": {'Ncat': 0}
+    "structure_taxonomy_classyfire_01kingdom": {'Ncat': 0},
+    "structure_taxonomy_classyfire_02superclass": {'Ncat': 19},
+    "structure_taxonomy_classyfire_03class": {'Ncat': 19},
+    "is_annotated": {'Ncat': 0}
 }
 
 for dic in dic_categories:
-    labels, data = Faerun.create_categories(df_gb[str(dic)])
-    dic_categories[dic]['data'], dic_categories[dic]['labels'] = Top_N_classes(dic_categories[dic]['Ncat'], data,
-                                                                               labels)
+    labels, data = Faerun.create_categories(df_merged[str(dic)])
+    dic_categories[dic]['data'], dic_categories[dic]['labels'] = Top_N_classes(dic_categories[dic]['Ncat'], data, labels)
 
-# Publication examples, but you can use it as you want!
-labels, data = Faerun.create_categories(df_gb['organism_taxonomy_06family_<lambda_0>'])
-simaroubaceae_data, simaroubaceae_labels = keep_only_given_class(['Simaroubaceae'], data, labels)
+# # Publication examples, but you can use it as you want!
+# labels, data = Faerun.create_categories(df_gb['organism_taxonomy_06family_<lambda_0>'])
+# simaroubaceae_data, simaroubaceae_labels = keep_only_given_class(['Simaroubaceae'], data, labels)
 
-labels, data = Faerun.create_categories(df_gb['structure_taxonomy_npclassifier_03class_first'])
-NPclass_data, NPclass_labels = keep_only_given_class([
-    'Oleanane triterpenoids', 'Germacrane sesquiterpenoids', 'Carotenoids (C40, β-β)',
-    'Flavonols', 'Lanostane, Tirucallane and Euphane triterpenoids', 'Cyclic peptides',
-    'Guaiane sesquiterpenoids', 'Flavones', 'Colensane and Clerodane diterpenoids',
-    'Quassinoids'], data, labels)
+# labels, data = Faerun.create_categories(df_gb['structure_taxonomy_npclassifier_03class_first'])
+# NPclass_data, NPclass_labels = keep_only_given_class([
+#     'Oleanane triterpenoids', 'Germacrane sesquiterpenoids', 'Carotenoids (C40, β-β)',
+#     'Flavonols', 'Lanostane, Tirucallane and Euphane triterpenoids', 'Cyclic peptides',
+#     'Guaiane sesquiterpenoids', 'Flavones', 'Colensane and Clerodane diterpenoids',
+#     'Quassinoids'], data, labels)
 
 # count_simaroubaceae = df_gb.organism_taxonomy_06family_join.str.count("Simaroubaceae")
 # simaroubaceae_specificity = count_simaroubaceae / df_gb['biosource_count']
 
-# Generating colormaps for plotting
-cmap = mcolors.ListedColormap(["gainsboro", "peachpuff", "salmon", "tomato"])
-cmap2 = mcolors.ListedColormap(["gainsboro", "tomato"])
-cmap3 = mcolors.ListedColormap(["lightgray", "firebrick"])
-cmap4 = mcolors.ListedColormap(
-    ["gainsboro", "#83C644", "#04AC6E", "#00ff99", "#008ECA", "#008C83", "#D61E1E", "#006A7A", "#00B2C4", "#2F4858",
-     "#EAD400"])
+# # Generating colormaps for plotting
+# cmap = mcolors.ListedColormap(["gainsboro", "peachpuff", "salmon", "tomato"])
+# cmap2 = mcolors.ListedColormap(["gainsboro", "tomato"])
+# cmap3 = mcolors.ListedColormap(["lightgray", "firebrick"])
+# cmap4 = mcolors.ListedColormap(
+#     ["gainsboro", "#83C644", "#04AC6E", "#00ff99", "#008ECA", "#008C83", "#D61E1E", "#006A7A", "#00B2C4", "#2F4858",
+#      "#EAD400"])
 
 # Generate a labels column
-df_gb["labels"] = (
-        df_gb["structure_smiles_first"]
-        + '__<a target="_blank" href="'
-        + df_gb["structure_wikidata"]
-        + '">'
-        + df_gb["id_wikidata"]
+df_merged["labels"] = (
+        df_merged["structure_smiles_2D"]
         + '__'
-        + df_gb['structure_inchikey_first']
-        + '__'
-        + df_gb["structure_taxonomy_npclassifier_03class_first"]
+        + df_merged["structure_taxonomy_classyfire_03class"]
         + "</a>"
 )
 
@@ -268,15 +225,15 @@ c_frac = []
 ring_atom_frac = []
 largest_ring_size = []
 
-n_iter = len(df_gb)
-for i, row in df_gb.iterrows():
+n_iter = len(df_merged)
+for i, row in df_merged.iterrows():
     j = (i + 1) / n_iter
     sys.stdout.write('\r')
     sys.stdout.write(f"[{'=' * int(50 * j):{50}s}] {round((100 * j), 2)}%")
     sys.stdout.flush()
     sleep(0.05)
 
-    mol = AllChem.MolFromSmiles(row["structure_smiles_2D_first"])
+    mol = AllChem.MolFromSmiles(row["structure_smiles_2D"])
     atoms = mol.GetAtoms()
     size = mol.GetNumHeavyAtoms()
     n_c = 0
@@ -298,21 +255,19 @@ for i, row in df_gb.iterrows():
         largest_ring_size.append(0)
     hac.append(size)
     fps.append(mol)
-    # fps.append(tm.VectorUint(enc.encode_mol(mol)))
-    # fps.append(tm.VectorUint(MAP4.calculate(mol)))
 
 fps = MAP4.calculate_many(fps)
 lf.batch_add(fps)
 lf.index()
 
 # Store lsh forest and structure metadata
-# lf.store("../../data/interim/tmap/210506_lotus_2D_map4.dat")
-# with open("../../data/interim/tmap/210506_lotus_2D_map4.pickle", "wb+") as f:
-#     pickle.dump(
-#         (hac, c_frac, ring_atom_frac, largest_ring_size),
-#         f,
-#         protocol=pickle.HIGHEST_PROTOCOL,
-#     )
+lf.store("210608_pf_set_annotation_vs_lotus.dat")
+with open("210608_pf_set_annotation_vs_lotus_attributes.pickle", "wb+") as f:
+    pickle.dump(
+        (hac, c_frac, ring_atom_frac, largest_ring_size),
+        f,
+        protocol=pickle.HIGHEST_PROTOCOL,
+    )
 
 # tmap configuration
 cfg = tm.LayoutConfiguration()
@@ -326,13 +281,13 @@ cfg.sl_repeats = 2
 x, y, s, t, _ = tm.layout_from_lsh_forest(lf, cfg)
 
 # To store coordinates
-# x = list(x)
-# y = list(y)
-# s = list(s)
-# t = list(t)
-# pickle.dump(
-#     (x, y, s, t), open("../../data/interim/tmap/210506_coords_lotus_2D_map4.dat", "wb+"), protocol=pickle.HIGHEST_PROTOCOL
-# )
+x = list(x)
+y = list(y)
+s = list(s)
+t = list(t)
+pickle.dump(
+    (x, y, s, t), open("210608_pf_set_annotation_vs_lotus_coords.dat", "wb+"), protocol=pickle.HIGHEST_PROTOCOL
+)
 
 del (lf)
 
@@ -376,11 +331,11 @@ del (lf)
 # AND CHEMICAL DESCRIPTORS
 ########################################################
 
-x, y, s, t = pickle.load(open("../../data/interim/tmap/210506_coords_lotus_2D_map4.dat",
-                              "rb"))  # Version "coords_210312_lotus.dat" contains 270'336 resulting from 210223_frozen_metadata groupby(structure_wikidata)
+x, y, s, t = pickle.load(open("210608_pf_set_annotation_vs_lotus_coords.dat",
+                              "rb"))
 
 hac, c_frac, ring_atom_frac, largest_ring_size = pickle.load(
-    open("../../data/interim/tmap/210506_lotus_2D_map4.pickle", "rb")
+    open("210608_pf_set_annotation_vs_lotus_attributes.pickle", "rb")
 )
 
 ########################################################
@@ -389,138 +344,45 @@ hac, c_frac, ring_atom_frac, largest_ring_size = pickle.load(
 c_frak_ranked = ss.rankdata(np.array(c_frac) / max(c_frac)) / len(c_frac)
 
 # Plotting function
-f = Faerun(view="front", coords=False, clear_color='#ffffff')
+f = Faerun(view="front", coords=False)#clear_color='#ffffff'
 f.add_scatter(
-    "lotus",
+    "annotations",
     {
         "x": x,
         "y": y,
         "c": [
-            dic_categories['structure_taxonomy_npclassifier_01pathway_first']['data'],
-            dic_categories['structure_taxonomy_npclassifier_02superclass_first']['data'],
-            dic_categories['structure_taxonomy_npclassifier_03class_first']['data'],
-            dic_categories['structure_taxonomy_classyfire_01kingdom_first']['data'],
-            dic_categories['structure_taxonomy_classyfire_02superclass_first']['data'],
-            dic_categories['structure_taxonomy_classyfire_03class_first']['data'],
-            dic_categories['structure_taxonomy_classyfire_04directparent_first']['data'],
-            dic_categories['organism_taxonomy_02kingdom_<lambda_0>']['data'],
-            dic_categories['organism_taxonomy_03phylum_<lambda_0>']['data'],
-            dic_categories['organism_taxonomy_04class_<lambda_0>']['data'],
-            dic_categories['organism_taxonomy_05order_<lambda_0>']['data'],
-            dic_categories['organism_taxonomy_06family_<lambda_0>']['data'],
-            dic_categories['organism_taxonomy_08genus_<lambda_0>']['data'],
-            dic_categories['organism_taxonomy_09species_<lambda_0>']['data'],
-            dic_categories['biosource_count_cat']['data'],
-            dic_categories['organism_taxonomy_02kingdom_nunique_cat']['data'],
-            dic_categories['organism_taxonomy_03phylum_nunique_cat']['data'],
-            dic_categories['organism_taxonomy_04class_nunique_cat']['data'],
-            dic_categories['organism_taxonomy_05order_nunique_cat']['data'],
-            dic_categories['organism_taxonomy_06family_nunique_cat']['data'],
-            dic_categories['organism_taxonomy_08genus_nunique_cat']['data'],
-            dic_categories['organism_taxonomy_09species_nunique_cat']['data'],
-            simaroubaceae_data,
-            NPclass_data,
-            dic_mean_specificity['organism_taxonomy_02kingdom'][
-                'structure_taxonomy_npclassifier_01pathway_first_score'],
-            dic_mean_specificity['organism_taxonomy_02kingdom'][
-                'structure_taxonomy_npclassifier_02superclass_first_score'],
-            dic_mean_specificity['organism_taxonomy_02kingdom'][
-                'structure_taxonomy_npclassifier_03class_first_score'],
-            dic_mean_specificity['organism_taxonomy_06family'][
-                'structure_taxonomy_npclassifier_01pathway_first_score'],
-            dic_mean_specificity['organism_taxonomy_06family'][
-                'structure_taxonomy_npclassifier_02superclass_first_score'],
-            dic_mean_specificity['organism_taxonomy_06family'][
-                'structure_taxonomy_npclassifier_03class_first_score'],
-            dic_mean_specificity['organism_taxonomy_08genus'][
-                'structure_taxonomy_npclassifier_01pathway_first_score'],
-            dic_mean_specificity['organism_taxonomy_08genus'][
-                'structure_taxonomy_npclassifier_02superclass_first_score'],
-            dic_mean_specificity['organism_taxonomy_08genus'][
-                'structure_taxonomy_npclassifier_03class_first_score'],
-            hac,
-            c_frak_ranked,
-            ring_atom_frac,
-            largest_ring_size,
+            dic_categories['structure_taxonomy_classyfire_01kingdom']['data'],
+            dic_categories['structure_taxonomy_classyfire_02superclass']['data'],
+            dic_categories['structure_taxonomy_classyfire_03class']['data'],
+            dic_categories['is_annotated']['data']
         ],
-        "labels": df_gb["labels"],
+        "labels": df_merged["labels"],
     },
     shader="smoothCircle",
     point_scale=2.0,
     max_point_size=10,
     legend_labels=[
-        dic_categories['structure_taxonomy_npclassifier_01pathway_first']['labels'],
-        dic_categories['structure_taxonomy_npclassifier_02superclass_first']['labels'],
-        dic_categories['structure_taxonomy_npclassifier_03class_first']['labels'],
-        dic_categories['structure_taxonomy_classyfire_01kingdom_first']['labels'],
-        dic_categories['structure_taxonomy_classyfire_02superclass_first']['labels'],
-        dic_categories['structure_taxonomy_classyfire_03class_first']['labels'],
-        dic_categories['structure_taxonomy_classyfire_04directparent_first']['labels'],
-        dic_categories['organism_taxonomy_02kingdom_<lambda_0>']['labels'],
-        dic_categories['organism_taxonomy_03phylum_<lambda_0>']['labels'],
-        dic_categories['organism_taxonomy_04class_<lambda_0>']['labels'],
-        dic_categories['organism_taxonomy_05order_<lambda_0>']['labels'],
-        dic_categories['organism_taxonomy_06family_<lambda_0>']['labels'],
-        dic_categories['organism_taxonomy_08genus_<lambda_0>']['labels'],
-        dic_categories['organism_taxonomy_09species_<lambda_0>']['labels'],
-        dic_categories['biosource_count_cat']['labels'],
-        dic_categories['organism_taxonomy_02kingdom_nunique_cat']['labels'],
-        dic_categories['organism_taxonomy_03phylum_nunique_cat']['labels'],
-        dic_categories['organism_taxonomy_04class_nunique_cat']['labels'],
-        dic_categories['organism_taxonomy_05order_nunique_cat']['labels'],
-        dic_categories['organism_taxonomy_06family_nunique_cat']['labels'],
-        dic_categories['organism_taxonomy_08genus_nunique_cat']['labels'],
-        dic_categories['organism_taxonomy_09species_nunique_cat']['labels'],
-        simaroubaceae_labels,
-        NPclass_labels
-    ],
-    categorical=[True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True,
-                 True, True, True, True, True, True, True,
-                 False, False, False, False, False, False, False, False, False, False, False, False],
-    colormap=["tab20", "tab20", "tab20", "tab20", "tab20", "tab20", "tab20", "tab20", "tab20", "tab20", "tab20",
-              "tab20", "tab20", "tab20", cmap, cmap2, cmap, cmap, cmap, cmap, cmap, cmap, cmap3, cmap4,
-              "inferno", "inferno", "inferno", "inferno", "inferno", "inferno", "inferno", "inferno",
-              "inferno", "rainbow", "rainbow", "rainbow", "Blues"],
-    series_title=[
-        "chemo_np_classifier_pathway",
-        "chemo_np_classifier_superclass",
-        "chemo_np_classifier_class",
-        "chemo_cf_kingdom",
-        "chemo_cf_superclass",
-        "chemo_cf_class",
-        "chemo_cf_parent",
-        "kingdom_bio",
-        "phylum_bio",
-        "class_bio",
-        "order_bio",
-        "family_bio",
-        "genus_bio",
-        "species_bio",
-        "biosource_count",
-        "kingdom_nunique",
-        "phylum_nunique",
-        "class_nunique",
-        "order_nunique",
-        "family_nunique",
-        "genus_nunique",
-        "species_nunique",
-        "Simaroubaceae vs others",
-        "Top8 classes, quassinoids and carotenoids",
-        "Pathway kingdom specificity",
-        "Superclass kingdom specificity",
-        "Class kingdom specificity",
-        "Pathway family specificity",
-        "Superclass family specificity",
-        "Class family specificity",
-        "Pathway genus specificity",
-        "Superclass genus specificity",
-        "Class genus specificity",
-        "HAC",
-        "C Frac",
-        "Ring Atom Frac",
-        "Largest Ring Size",
-    ],
-    has_legend=True,
+        dic_categories['structure_taxonomy_classyfire_01kingdom']['labels'],
+        dic_categories['structure_taxonomy_classyfire_02superclass']['labels'],
+        dic_categories['structure_taxonomy_classyfire_03class']['labels'],
+        dic_categories['is_annotated']['labels']
+        ],
+    categorical=[True, True, True, True],
+    colormap=["tab20", "tab20", "tab20", "tab20"],
+    series_title=[ "chemo_cf_kingdom", "chemo_cf_superclass", "chemo_cf_class", "annotation_status"],
+    has_legend=True
 )
-f.add_tree("lotus_tree", {"from": s, "to": t}, point_helper="lotus", color='#e6e6e6')
-f.plot('../../res/html/210506_lotus_map4_2D', template="smiles")
+
+f.add_tree("annotation_tree", {"from": s, "to": t}, point_helper="annotations", color='#e6e6e6')
+f.plot('210609_annotation_vs_lotusdnp_tmap', template="smiles")
+
+
+            # hac,
+            # c_frak_ranked,
+            # ring_atom_frac,
+            # largest_ring_size,
+        # "HAC",
+        # "C Frac",
+        # "Ring Atom Frac",
+        # "Largest Ring Size",
+        # #, "rainbow", "rainbow", "rainbow", "Blues"],

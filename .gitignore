@@ -1,4 +1,6 @@
 *.dat
+*.pickle
 *.csv
 *.gz
 *.tsv
+*.html
