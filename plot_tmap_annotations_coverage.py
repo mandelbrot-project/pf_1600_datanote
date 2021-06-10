@@ -4,6 +4,8 @@ from collections import Counter
 from time import sleep
 
 import matplotlib.colors as mcolors
+from matplotlib import cm
+from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy.stats as ss
@@ -21,13 +23,13 @@ def Top_N_classes(N=0, input_data=[], input_labels=[]):
         return input_data, input_labels
     else:
         top_input = [i for i, _ in Counter(input_data).most_common(N)]
-        output_labels = [(15, "Other")]
-        input_map = [15] * len(input_data)
+        output_labels = [(7, "Other")]
+        input_map = [7] * len(input_data)
         value = 1
         for i, name in input_labels:
             if i in top_input:
                 v = value
-                if v == 15:
+                if v == 7:
                     v = 0
                 output_labels.append((v, name))
                 input_map[i] = v
@@ -72,26 +74,39 @@ def keep_only_given_class(to_keep=[], input_data=[], input_labels=[]):
 # Load lotus
 df_meta = pd.read_csv(
     '210523_lotus_dnp_metadata.csv',
-    usecols=['structure_smiles_2D', 'structure_taxonomy_npclassifier_01pathway',
+    usecols=['organism_taxonomy_02kingdom', 'structure_smiles_2D', 'structure_taxonomy_npclassifier_01pathway',
     'structure_taxonomy_npclassifier_02superclass', 'structure_taxonomy_npclassifier_03class', 
     'structure_taxonomy_classyfire_01kingdom', 'structure_taxonomy_classyfire_02superclass', 
     'structure_taxonomy_classyfire_03class'],
     sep=",")
 
+plant_smiles = []
+for i, row in df_meta.iterrows():
+    if row['organism_taxonomy_02kingdom'] == 'Archaeplastida':
+        plant_smiles.append(row['structure_smiles_2D'])
+plant_smiles = set(plant_smiles)
+
 # Keep only 1 occurence of structure - biosource pair
 df_meta = df_meta.drop_duplicates(
     subset=['structure_smiles_2D'])
+
+# Check is structure reported in plant
+df_meta['is_in_plant'] = df_meta['structure_smiles_2D'].isin(plant_smiles)
 
 ########################################################
 ###           PART 2: LOAD annotations               ###
 ########################################################
 
 # Load annotations
-df_annotations = pd.read_csv('Table_PF_pos_190905.csv', usecols=['CRC_Number_DNP', 'Smiles_DNP'], low_memory=False, sep=",")
+df_annotations = pd.read_csv('Table_PF_pos_190905.csv', usecols=['CRC_Number_DNP', 'Smiles_DNP', 'Taxonomical_Score_ISDB'], low_memory=False, sep=",")
 
 df_annotations['Smiles'] = df_annotations['Smiles_DNP'].str.split('|').str[0]
 df_annotations['CRC_Number_DNP'] = df_annotations['CRC_Number_DNP'].str.split('|').str[0]
+df_annotations['Taxonomical_Score_ISDB'] = df_annotations['Taxonomical_Score_ISDB'].str.split('|').str[0]
+df_annotations['Taxonomical_Score_ISDB'] = pd.to_numeric(df_annotations['Taxonomical_Score_ISDB'])
+
 df_annotations.dropna(subset=['Smiles'], inplace=True)
+df_annotations = df_annotations[df_annotations['Taxonomical_Score_ISDB'] > 0] # Keep only reweighted annotations
 
 anisomeric_smiles = []
 inchikey = []
@@ -104,18 +119,16 @@ for i, row in df_annotations.iterrows():
         inchikey.append(ik)
     else:
         anisomeric_smiles.append(np.nan)
-        inchikey.append(aniso_smiles)
+        inchikey.append(np.nan)
 
 df_annotations['anisomeric_smiles'] = anisomeric_smiles
 df_annotations['inchikey'] = inchikey
+df_annotations.dropna(subset=['anisomeric_smiles'], inplace=True)
 df_annotations['inchikey_2D'] = df_annotations['inchikey'].str[:14]
 
-df_annotations = df_annotations.drop_duplicates(
-    subset=['inchikey_2D'])
+df_annotations = df_annotations.drop_duplicates(subset=['inchikey_2D'])
     
-df_annotations.dropna(subset=['anisomeric_smiles'], inplace=True)
-
-df_annotations.drop(['Smiles', 'Smiles_DNP'], axis=1, inplace=True)
+df_annotations.drop(['Smiles_DNP'], axis=1, inplace=True)
 
 print('Number of unique annotations (2D structures): ' + str(len(df_annotations)))
 
@@ -127,10 +140,8 @@ df_classes_dnp.drop_duplicates(subset='CRC_Number_DNP', inplace=True)
 df_annotations = df_annotations.merge(df_classes_dnp, on = 'CRC_Number_DNP', how ='left')
 df_annotations.drop(['CRC_Number_DNP'], axis=1, inplace=True)
 
-
 # Merge both tables:
 
-anisomeric_smiles = []
 inchikey = []
 for i, row in df_meta.iterrows():
     mol = AllChem.MolFromSmiles(row["structure_smiles_2D"])
@@ -138,13 +149,12 @@ for i, row in df_meta.iterrows():
         ik = AllChem.MolToInchiKey(mol)
         inchikey.append(ik)
     else:
-        anisomeric_smiles.append(np.nan)
-        inchikey.append(aniso_smiles)
+        inchikey.append(np.nan)
 
 df_meta['inchikey'] = inchikey
+df_meta.dropna(subset=['inchikey'], inplace=True)
 df_meta['inchikey_2D'] = df_meta['inchikey'].str[:14]
-df_meta = df_meta.drop_duplicates(
-    subset=['inchikey_2D'])
+df_meta = df_meta.drop_duplicates(subset=['inchikey_2D'])
 
 
 df_merged = pd.merge(df_meta, df_annotations, left_on = 'inchikey_2D', right_on='inchikey_2D', how='outer')
@@ -154,13 +164,14 @@ df_merged['structure_smiles_2D'].fillna(df_merged['anisomeric_smiles'], inplace=
 df_merged['structure_taxonomy_classyfire_01kingdom'].fillna(df_merged['Kingdom_cf_DNP'], inplace=True)
 df_merged['structure_taxonomy_classyfire_02superclass'].fillna(df_merged['Superclass_cf_DNP'], inplace=True)
 df_merged['structure_taxonomy_classyfire_03class'].fillna(df_merged['Class_cf_DNP'], inplace=True)
+df_merged['is_in_plant'].fillna(True, inplace=True)
 
 df_merged.drop(['anisomeric_smiles', 'Kingdom_cf_DNP', 'Superclass_cf_DNP', 'Class_cf_DNP'], axis=1, inplace=True)
 
 values = {
-    # 'structure_taxonomy_npclassifier_01pathway_first': 'Unknown',
-    # 'structure_taxonomy_npclassifier_02superclass_first': 'Unknown',
-    # 'structure_taxonomy_npclassifier_03class_first': 'Unknown',
+    'structure_taxonomy_npclassifier_01pathway': 'Unknown',
+    'structure_taxonomy_npclassifier_02superclass': 'Unknown',
+    'structure_taxonomy_npclassifier_03class': 'Unknown',
     'structure_taxonomy_classyfire_01kingdom': 'Unknown',
     'structure_taxonomy_classyfire_02superclass': 'Unknown',
     'structure_taxonomy_classyfire_03class': 'Unknown',
@@ -169,10 +180,14 @@ df_merged.fillna(value=values, inplace=True)
 
 # Generating class for plotting
 dic_categories = {
+    "structure_taxonomy_npclassifier_01pathway": {'Ncat': 9},
+    "structure_taxonomy_npclassifier_02superclass": {'Ncat': 9},
+    "structure_taxonomy_npclassifier_03class": {'Ncat': 9},
     "structure_taxonomy_classyfire_01kingdom": {'Ncat': 0},
-    "structure_taxonomy_classyfire_02superclass": {'Ncat': 19},
-    "structure_taxonomy_classyfire_03class": {'Ncat': 19},
-    "is_annotated": {'Ncat': 0}
+    "structure_taxonomy_classyfire_02superclass": {'Ncat': 9},
+    "structure_taxonomy_classyfire_03class": {'Ncat': 9},
+    "is_annotated": {'Ncat': 0},
+    "is_in_plant": {'Ncat': 0}
 }
 
 for dic in dic_categories:
@@ -205,9 +220,19 @@ for dic in dic_categories:
 df_merged["labels"] = (
         df_merged["structure_smiles_2D"]
         + '__'
-        + df_merged["structure_taxonomy_classyfire_03class"]
+        # + df_merged["structure_taxonomy_classyfire_03class"]
         + "</a>"
 )
+
+cmap = mcolors.ListedColormap(['#e6e6e6', "crimson"])
+
+tab_10 = cm.get_cmap("tab10")
+colors = [tab_10(i) for i in range(tab_10.N)]
+colors[7] = '#e6e6e6' #(0.230,0.230,0.230)
+colors[9] = '#e6e6e6' #(0.230,0.230,0.230)
+cmap2 = mcolors.ListedColormap(colors)
+
+cmap3 = mcolors.ListedColormap(['#e6e6e6', "forestgreen"])
 
 ########################################################
 # OPTION 1: START FROM SCRATCH AND GENERATE LSH FOREST AND TMAP FROM SMILES, PLUS CHEMICAL DESCRIPTORS
@@ -344,45 +369,80 @@ hac, c_frac, ring_atom_frac, largest_ring_size = pickle.load(
 c_frak_ranked = ss.rankdata(np.array(c_frac) / max(c_frac)) / len(c_frac)
 
 # Plotting function
-f = Faerun(view="front", coords=False)#clear_color='#ffffff'
+f = Faerun(view="front", coords=False, clear_color='#ffffff')
 f.add_scatter(
-    "annotations",
+    "attributes",
     {
         "x": x,
         "y": y,
         "c": [
+            dic_categories['structure_taxonomy_npclassifier_01pathway']['data'],
+            dic_categories['structure_taxonomy_npclassifier_02superclass']['data'],
+            dic_categories['structure_taxonomy_npclassifier_03class']['data'],
             dic_categories['structure_taxonomy_classyfire_01kingdom']['data'],
             dic_categories['structure_taxonomy_classyfire_02superclass']['data'],
             dic_categories['structure_taxonomy_classyfire_03class']['data'],
-            dic_categories['is_annotated']['data']
+            dic_categories['is_annotated']['data'],
+            dic_categories['is_in_plant']['data'],
+            hac,
+            c_frak_ranked,
+            ring_atom_frac,
+            largest_ring_size,
         ],
-        "labels": df_merged["labels"],
+        "labels": df_merged["structure_smiles_2D"],
     },
     shader="smoothCircle",
-    point_scale=2.0,
+    point_scale=3.0,
     max_point_size=10,
     legend_labels=[
+        dic_categories['structure_taxonomy_npclassifier_01pathway']['labels'],
+        dic_categories['structure_taxonomy_npclassifier_02superclass']['labels'],
+        dic_categories['structure_taxonomy_npclassifier_03class']['labels'],
         dic_categories['structure_taxonomy_classyfire_01kingdom']['labels'],
         dic_categories['structure_taxonomy_classyfire_02superclass']['labels'],
         dic_categories['structure_taxonomy_classyfire_03class']['labels'],
-        dic_categories['is_annotated']['labels']
+        dic_categories['is_annotated']['labels'],
+        dic_categories['is_in_plant']['labels']
         ],
-    categorical=[True, True, True, True],
-    colormap=["tab20", "tab20", "tab20", "tab20"],
-    series_title=[ "chemo_cf_kingdom", "chemo_cf_superclass", "chemo_cf_class", "annotation_status"],
+    categorical=[True, True, True, True, True, True, True, True, False, False, False, False],
+    colormap=[cmap2, cmap2, cmap2, cmap2, cmap2, cmap2, cmap, cmap3, "rainbow", "rainbow", "rainbow", "Blues"],
+    series_title=["chemo_np_kingdom", "chemo_np_superclass", "chemo_np_class","chemo_cf_kingdom",  "chemo_cf_superclass", "chemo_cf_class", "Is annotated", "Found in plants", "HAC", "C Frac", "Ring Atom Frac", "Largest Ring Size",],
     has_legend=True
 )
-
-f.add_tree("annotation_tree", {"from": s, "to": t}, point_helper="annotations", color='#e6e6e6')
+f.add_tree("annotation_tree", {"from": s, "to": t}, point_helper="attributes", color='#e6e6e6')
 f.plot('210609_annotation_vs_lotusdnp_tmap', template="smiles")
 
 
-            # hac,
-            # c_frak_ranked,
-            # ring_atom_frac,
-            # largest_ring_size,
-        # "HAC",
-        # "C Frac",
-        # "Ring Atom Frac",
-        # "Largest Ring Size",
-        # #, "rainbow", "rainbow", "rainbow", "Blues"],
+### Bar Chart
+
+import plotly.express as px
+import plotly.graph_objects as go
+
+df_for_plot = df_merged[['structure_taxonomy_npclassifier_03class', 'is_annotated', 'structure_smiles_2D']]
+df_for_plot = df_for_plot[df_for_plot['structure_taxonomy_npclassifier_03class'] != 'Unknown']
+df_for_plot['is_annotated'] = np.where(df_for_plot['is_annotated'] == 'yes', 1, 0)
+
+df_for_plot = df_for_plot.groupby('structure_taxonomy_npclassifier_03class').agg(
+    {'structure_smiles_2D': 'count',
+     'is_annotated': 'sum',
+    })
+
+df_for_plot.sort_values(['is_annotated'], ascending=False, inplace=True)
+df_for_plot = df_for_plot.head(20)
+
+fig = go.Figure(go.Bar(x=df_for_plot.index, y=df_for_plot.is_annotated, name='Annotated', text=df_for_plot.is_annotated, marker_color='#DC143C'))
+fig.add_trace(go.Bar(x=df_for_plot.index, y=df_for_plot.structure_smiles_2D, name='Reported', text=df_for_plot.structure_smiles_2D, marker_color='#228B22'))
+
+fig.update_layout(
+    barmode='stack', template='simple_white', width=2500, height=1000,
+    font=dict(
+        size=25,
+    ))
+
+# fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+# fig.update_layout(uniformtext_minsize=8)
+
+fig.show()
+
+fig.write_image("barchart.svg")
+
