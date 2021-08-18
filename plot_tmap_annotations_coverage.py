@@ -85,8 +85,7 @@ for i, row in df_meta.iterrows():
 plant_smiles = set(plant_smiles)
 
 # Keep only 1 occurence of structure - biosource pair
-df_meta = df_meta.drop_duplicates(
-    subset=['structure_smiles_2D'])
+df_meta = df_meta.drop_duplicates(subset=['structure_smiles_2D'])
 
 ########################################################
 ###           PART 2: LOAD annotations               ###
@@ -160,10 +159,9 @@ df_merged.fillna(value=values, inplace=True)
 
 # Special tricks to plot selected classes
 chemical_classes_to_plot = [
-    'Cholestane steroids', 'Cyclic peptides', 'Flavones',
-    'Flavonols', 'Germacrane sesquiterpenoids', 'Guaiane sesquiterpenoids',
-    'Limonoids',
-    'Oleanane triterpenoids']
+    'Cholestane steroids', 'Cyclic peptides', 'Flavones', 'Flavonols',
+    'Germacrane sesquiterpenoids', 'Guaiane sesquiterpenoids', 'Limonoids', 'Oleanane triterpenoids'
+    ]
 
 df_merged['chemical_classes_to_plot'] = np.where(
     df_merged['structure_taxonomy_npclassifier_03class'].isin(chemical_classes_to_plot),
@@ -401,9 +399,6 @@ colors_chemical_classes =[
     '#FF8C61', '#985277', '#8f2600', '#5C374C', '#5fa8d3', '#1b4965', '#CE6A85', '#04a777'
     ]
 
-
-colors_chemical_classes = ['#FF8C61', '#CE6A85', '#04a777', '#5fa8d3', '#1b4965', '#985277', '#8f2600', '#e6e6e6', '#5C374C', '#e6e6e6']
-
 df_for_plot = df_merged[df_merged['structure_taxonomy_npclassifier_03class'].isin(chemical_classes_to_plot)]
 
 df_for_plot = df_for_plot[['structure_taxonomy_npclassifier_03class', 'is_annotated', 'structure_smiles_2D']]
@@ -417,8 +412,9 @@ df_for_plot = df_for_plot.groupby('structure_taxonomy_npclassifier_03class').agg
     })
 
 df_for_plot.sort_values(['is_annotated'], ascending=False, inplace=True)
-df_for_plot = df_for_plot.head(20)
+df_for_plot['structure_smiles_2D'] = df_for_plot['structure_smiles_2D'] - df_for_plot['is_annotated']
 
+# Version 1
 fig = go.Figure(go.Bar(x=df_for_plot.index, y=df_for_plot.is_annotated, name='Annotated', text=df_for_plot.is_annotated, marker_color='#023047'))
 fig.add_trace(go.Bar(x=df_for_plot.index, y=df_for_plot.structure_smiles_2D, name='Reported', text=df_for_plot.structure_smiles_2D, marker_color='#e6e6e6'))
 
@@ -434,8 +430,23 @@ fig.update_layout(
     yaxis_title="Count",)
 
 fig.update_xaxes(tickfont = dict(size=40))
-
 fig.show()
-
 fig.write_image("barchart_2.jpg")
 
+
+# Version 2
+
+fig = go.Figure(data=[
+    go.Bar(name='Total', x=df_for_plot.index, y=df_for_plot.is_annotated,marker_color=colors_chemical_classes),
+    go.Bar(name='Annotation', x=df_for_plot.index, y=df_for_plot.structure_smiles_2D,marker_color=colors_chemical_classes, opacity =0.4)
+])
+# Change the bar mode
+fig.update_layout(
+    barmode='stack', template='simple_white', width=1500, height=1000,
+    xaxis_title="Selected chemical classes",
+    yaxis_title="Count",
+    font=dict(
+        size=40,
+    ))
+fig.show()
+fig.write_image("barchart_3.jpg")
