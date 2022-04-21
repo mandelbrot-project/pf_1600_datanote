@@ -84,7 +84,7 @@ for i, row in df_meta.iterrows():
         plant_smiles.append(row['structure_smiles_2D'])
 plant_smiles = set(plant_smiles)
 
-# Keep only 1 occurence of structure - biosource pair
+# Keep only 1 occurence of each 2d structure
 df_meta = df_meta.drop_duplicates(subset=['structure_smiles_2D'])
 
 ########################################################
