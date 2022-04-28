@@ -498,7 +498,7 @@ fig.write_image(image_output_folder + "barchart_3.jpg")
 
 # All chemical classes
 
-level_chemo = 'structure_taxonomy_npclassifier_03class'
+level_chemo = 'structure_taxonomy_npclassifier_01pathway'
 df_for_plot = df_merged[[level_chemo, 'is_annotated', 'structure_smiles_2D']]
 
 df_for_plot = df_for_plot[df_for_plot[level_chemo] != 'Unknown']
@@ -524,5 +524,5 @@ fig.update_layout(
     # )
     )
 fig.show()
-fig.write_html(image_output_folder + "barchart_class.html")
+fig.write_html(output_folder + "barchart_pathway.html")
 
