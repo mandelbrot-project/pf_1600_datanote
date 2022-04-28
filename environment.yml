@@ -1,18 +1,17 @@
 name: pf_datanote
 channels:
   - defaults
-  - conda-forge
-  - tmap
 dependencies:
   - python=3.9
-  - ipykernel
-  - matplotlib
-  - pandas
-  - scipy
   - tmap
   - faerun
-  - rdkit
   - pip
-  - pip:
-    - mhfp
-    - git+https://github.com/reymond-group/map4
+  - pandas
+  - scipy
+  - matplotlib
+  - ipykernel
+  - rdkit
+  - wget
+  - requests
+  - plotly
+prefix: /home/allardpm/anaconda3/envs/pf_datanote
