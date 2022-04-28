@@ -450,3 +450,33 @@ fig.update_layout(
     ))
 fig.show()
 fig.write_image("barchart_3.jpg")
+
+# All chemical classes
+level_chemo = 'structure_taxonomy_npclassifier_01pathway'
+df_for_plot = df_merged[[level_chemo, 'is_annotated', 'structure_smiles_2D']]
+
+df_for_plot = df_for_plot[df_for_plot[level_chemo] != 'Unknown']
+df_for_plot['is_annotated'] = np.where(df_for_plot['is_annotated'] == 'yes', 1, 0)
+
+df_for_plot = df_for_plot.groupby(level_chemo).agg(
+    {'structure_smiles_2D': 'count',
+     'is_annotated': 'sum',
+    })
+
+df_for_plot.sort_values(['is_annotated'], ascending=False, inplace=True)
+df_for_plot['structure_smiles_2D'] = df_for_plot['structure_smiles_2D'] - df_for_plot['is_annotated']
+fig = go.Figure(data=[
+    go.Bar(name='Annotation', x=df_for_plot.index, y=df_for_plot.is_annotated, marker_color='#0a9396'),
+    go.Bar(name='Total', x=df_for_plot.index, y=df_for_plot.structure_smiles_2D, marker_color='#0a9396', opacity =0.4)
+])
+# Change the bar mode
+fig.update_layout(
+    barmode='stack', template='simple_white', width=1500, height=1000,
+    yaxis_title="Count",
+    # font=dict(
+    #     size=40,
+    # )
+    )
+fig.show()
+fig.write_html("barchart_4_pathway.html")
+
