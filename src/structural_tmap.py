@@ -115,7 +115,7 @@ open(dataset_annotations_filename, "wb").write(response.content)
 
 # Load lotus
 df_meta = pd.read_csv(
-    lotus_annotations_path,
+    lotus_annotations_filename,
     usecols=['organism_taxonomy_02kingdom', 'structure_smiles', 'structure_smiles_2D', 'structure_taxonomy_npclassifier_01pathway',
     'structure_taxonomy_npclassifier_02superclass', 'structure_taxonomy_npclassifier_03class'],
     sep=",")
@@ -134,7 +134,7 @@ df_meta = df_meta.drop_duplicates(subset=['structure_smiles_2D'])
 ########################################################
 
 # Load annotations
-df_annotations = pd.read_csv(dataset_annotations_path, usecols=['structure_smiles', 'score_taxo', 'structure_taxonomy_npclassifier_01pathway', 'structure_taxonomy_npclassifier_02superclass', 'structure_taxonomy_npclassifier_03class'], low_memory=False, sep="\t")
+df_annotations = pd.read_csv(dataset_annotations_filename, usecols=['structure_smiles', 'score_taxo', 'structure_taxonomy_npclassifier_01pathway', 'structure_taxonomy_npclassifier_02superclass', 'structure_taxonomy_npclassifier_03class'], low_memory=False, sep="\t")
 
 df_annotations = df_annotations[df_annotations['score_taxo'] > 0] # Keep only reweighted annotations
 
