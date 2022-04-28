@@ -1,6 +1,8 @@
 name: pf_datanote
 channels:
   - defaults
+  - conda-forge
+  - tmap
 dependencies:
   - python=3.9
   - ipykernel
@@ -14,4 +16,3 @@ dependencies:
   - pip:
     - mhfp
     - git+https://github.com/reymond-group/map4
-prefix: /opt/anaconda3/envs/pf_datanote
