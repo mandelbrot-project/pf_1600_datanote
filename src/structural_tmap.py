@@ -104,12 +104,12 @@ image_output_folder = 'docs/img/'
 
 URL = "https://zenodo.org/record/6378204/files/220318_frozen_metadata.csv.gz"
 response = requests.get(URL)
-open(lotus_annotations_filename, "wb").write(response.content)
+open(lotus_annotations_path, "wb").write(response.content)
 
 
 URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-04-28_pmallard_b0e0f70c/other/PF_full_datanote/PF_full_datanote_spectral_match_results_repond_flat.tsv"
 response = requests.get(URL)
-open(dataset_annotations_filename, "wb").write(response.content)
+open(dataset_annotations_path, "wb").write(response.content)
 
 
 ########################################################
