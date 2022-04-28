@@ -13,10 +13,25 @@ library(ggtree)
 
 # The full taxo is downloaded from OTL 
 # https://tree.opentreeoflife.org/about/taxonomy-version/ott3.3
+options(timeout=150)
+
+# Adter setting the url and the destination path
+url <- "http://files.opentreeoflife.org/ott/ott3.3/ott3.3.tgz"
+taxonomy_ott <- "./tmp/ott3.3.tgz"
+
+# we can dowload the ott taxo
+download.file(url, taxonomy_ott)
+
+# and have a look at the contenst of the archive
+untar(taxonomy_ott,list=TRUE)  ## check contents
+
+# We are interested in the ott3.3/taxonomy.tsv
+untar(taxonomy_ott,files="ott3.3/taxonomy.tsv", exdir = "./tmp/")
 
 
-#taxonomy <- read_delim("~/Downloads/ott3.3/taxonomy.tsv", delim = "|", escape_double = FALSE, trim_ws = TRUE)
-taxonomy <- read_delim("C:/users/defossee/Downloads/ott3.3/taxonomy.tsv", delim = "|", escape_double = FALSE, trim_ws = TRUE)
+taxonomy <- read_delim("./tmp/ott3.3/taxonomy.tsv", delim = "|", escape_double = FALSE, trim_ws = TRUE)
+
+
 PF_d <- read_delim("G:/My Drive/taf/git_repository/phylogenetic_pfdatanote_sandbox/data/inputs/pf_metadata_otoled.tsv", delim = "\t", escape_double = FALSE, trim_ws = TRUE)
 
 
@@ -45,20 +60,27 @@ print_all(g)
 
 # And the subcomponent to filter for all node below Archaeplastida https://igraph.org/r/doc/subcomponent.html
 
+# Here we use the subcomponent function in order to filter the graph and limit it to Archaeplastida
 
 sub_g <- subcomponent(g, '10210', mode = 'out') ## tracheophyta ott id
 
 g2 <- induced_subgraph(g, sub_g)
 
+# We keep the id as numerics
+
 id_sel <- as.numeric(V(g2)$name)
 
 taxonomy_final <- taxonomy[taxonomy$uid %in% id_sel,]
 
+# We then restrict the graph at the family level
+
 taxonomy_family <- taxonomy_final %>% 
-                       filter(rank == "family" & is.na(flags)) 
-                       
+                       filter(rank == "family" & is.na(flags))
+
+# We retrieve the upper lineage for all families
 
 taxonomy_family_lineage <- tax_lineage(taxonomy_taxon_info(taxonomy_family$uid, include_lineage = TRUE))  
+
 
 taxonomy_family_lineage_matt <- ldply(taxonomy_family_lineage,rbind)
 
@@ -75,13 +97,20 @@ taxonomy_family_lineage_wide$.id <- as.integer(taxonomy_family_lineage_wide$.id)
 taxonomy_family_full <-
   left_join(taxonomy_family,taxonomy_family_lineage_wide,by=c("uid" = ".id"))
 
+View(taxonomy_family_full)
 
-#my_tree1 <- tol_induced_subtree(ott_ids = taxonomy_family_full$uid)
+my_tree <- tol_induced_subtree(ott_ids = taxonomy_family_full$uid)
 
-#sp_name <-gsub("_.*","",my_tree$tip.label)
 
-#my_tree$tip.label <- sp_name
+sp_name <-gsub("_.*","",my_tree$tip.label)
 
+my_tree$tip.label <- sp_name
+
+plot(my_tree)
+
+typeof(my_tree)
+
+ape::write.tree(my_tree, file='tree.txt')
 
 #species <- taxonomy_family_full$name
 #g <- split(species, taxonomy_family_full$unique_name.class)
