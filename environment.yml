@@ -1,0 +1,17 @@
+name: pf_datanote
+channels:
+  - defaults
+dependencies:
+  - python=3.9
+  - ipykernel
+  - matplotlib
+  - pandas
+  - scipy
+  - tmap
+  - faerun
+  - rdkit
+  - pip
+  - pip:
+    - mhfp
+    - git+https://github.com/reymond-group/map4
+prefix: /opt/anaconda3/envs/pf_datanote

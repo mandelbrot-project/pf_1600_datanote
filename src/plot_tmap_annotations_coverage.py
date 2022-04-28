@@ -2,7 +2,6 @@ import pickle
 import sys
 from collections import Counter
 from time import sleep
-
 import matplotlib.colors as mcolors
 from matplotlib import cm
 from matplotlib import pyplot as plt
