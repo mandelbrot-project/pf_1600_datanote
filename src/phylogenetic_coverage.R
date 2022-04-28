@@ -9,17 +9,57 @@ library(gridExtra)
 library(ggfortify)
 library(ggtree)
 
+
+#################
+
+# > sessionInfo()
+# R version 4.1.3 (2022-03-10)
+# Platform: x86_64-apple-darwin17.0 (64-bit)
+# Running under: macOS Big Sur/Monterey 10.16
+
+# Matrix products: default
+# BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+# LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
+
+# locale:
+# [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+# attached base packages:
+# [1] stats     graphics  grDevices utils     datasets  methods   base     
+
+# other attached packages:
+# [1] ggtree_3.2.1     ggfortify_0.4.14 ggplot2_3.3.5    gridExtra_2.3   
+# [5] plyr_1.8.7       igraph_1.2.11    dplyr_1.0.8      readr_2.1.2     
+# [9] rotl_3.0.12     
+
+# loaded via a namespace (and not attached):
+#  [1] treeio_1.18.1      progress_1.2.2     tidyselect_1.1.2   purrr_0.3.4       
+#  [5] lattice_0.20-45    tcltk_4.1.3        ggfun_0.0.5        colorspace_2.0-3  
+#  [9] vctrs_0.3.8        generics_0.1.2     utf8_1.2.2         XML_3.99-0.9      
+# [13] gridGraphics_0.5-1 rlang_1.0.2        pillar_1.7.0       glue_1.6.2        
+# [17] withr_2.5.0        bit64_4.0.5        rentrez_1.2.3      lifecycle_1.0.1   
+# [21] stringr_1.4.0      munsell_0.5.0      gtable_0.3.0       tzdb_0.2.0        
+# [25] curl_4.3.2         parallel_4.1.3     fansi_1.0.3        Rcpp_1.0.8.3      
+# [29] scales_1.1.1       vroom_1.5.7        jsonlite_1.8.0     bit_4.0.4         
+# [33] hms_1.1.1          aplot_0.1.2        rncl_0.8.6         stringi_1.7.6     
+# [37] grid_4.1.3         cli_3.2.0          tools_4.1.3        yulab.utils_0.0.4 
+# [41] magrittr_2.0.2     lazyeval_0.2.2     patchwork_1.1.1    tibble_3.1.6      
+# [45] crayon_1.5.0       ape_5.6-2          tidyr_1.2.0        pkgconfig_2.0.3   
+# [49] tidytree_0.3.9     ellipsis_0.3.2     ggplotify_0.1.0    prettyunits_1.1.1 
+# [53] assertthat_0.2.1   httr_1.4.2         R6_2.5.1           nlme_3.1-155      
+# [57] compiler_4.1.3    
+
   ###############  
 
 # The full taxo is downloaded from OTL 
 # https://tree.opentreeoflife.org/about/taxonomy-version/ott3.3
 options(timeout=150)
 
-# Adter setting the url and the destination path
+# After setting the url and the destination path
 url <- "http://files.opentreeoflife.org/ott/ott3.3/ott3.3.tgz"
 taxonomy_ott <- "./tmp/ott3.3.tgz"
 
-# we can dowload the ott taxo
+# we can download the ott taxo
 download.file(url, taxonomy_ott)
 
 # and have a look at the contenst of the archive
@@ -32,7 +72,15 @@ untar(taxonomy_ott,files="ott3.3/taxonomy.tsv", exdir = "./tmp/")
 taxonomy <- read_delim("./tmp/ott3.3/taxonomy.tsv", delim = "|", escape_double = FALSE, trim_ws = TRUE)
 
 
-PF_d <- read_delim("G:/My Drive/taf/git_repository/phylogenetic_pfdatanote_sandbox/data/inputs/pf_metadata_otoled.tsv", delim = "\t", escape_double = FALSE, trim_ws = TRUE)
+# After setting the url and the destination path
+url <- "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-04-28_pmallard_7c3d8556/other/pf_metadata_otoled.tsv"
+pf_dataset_taxonomy <- "./tmp/pf_metadata_otoled.tsv"
+
+# we can download the ott taxo
+download.file(url, pf_dataset_taxonomy)
+
+
+PF_d <- read_delim(pf_dataset_taxonomy, delim = "\t", escape_double = FALSE, trim_ws = TRUE)
 
 
 
@@ -97,20 +145,20 @@ taxonomy_family_lineage_wide$.id <- as.integer(taxonomy_family_lineage_wide$.id)
 taxonomy_family_full <-
   left_join(taxonomy_family,taxonomy_family_lineage_wide,by=c("uid" = ".id"))
 
-View(taxonomy_family_full)
+# View(taxonomy_family_full)
 
-my_tree <- tol_induced_subtree(ott_ids = taxonomy_family_full$uid)
+# my_tree <- tol_induced_subtree(ott_ids = taxonomy_family_full$uid)
 
 
-sp_name <-gsub("_.*","",my_tree$tip.label)
+# sp_name <-gsub("_.*","",my_tree$tip.label)
 
-my_tree$tip.label <- sp_name
+# my_tree$tip.label <- sp_name
 
-plot(my_tree)
+# plot(my_tree)
 
-typeof(my_tree)
+# typeof(my_tree)
 
-ape::write.tree(my_tree, file='tree.txt')
+# ape::write.tree(my_tree, file='tree.txt')
 
 #species <- taxonomy_family_full$name
 #g <- split(species, taxonomy_family_full$unique_name.class)

@@ -6,3 +6,4 @@
 *.pptx
 *.cdx
 tmp
+.DS_Store
