@@ -5,8 +5,10 @@ dependencies:
   - python=3.9
   - tmap
   - faerun
-  - pip
   - pandas
+  - pip
+  - pip:
+    - git+https://github.com/reymond-group/map4
   - scipy
   - matplotlib
   - ipykernel
