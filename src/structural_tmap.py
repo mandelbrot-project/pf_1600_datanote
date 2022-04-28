@@ -340,36 +340,36 @@ del (lf)
 # OPTION 2: LOAD PRE_COMPUTED LSH FOREST AND CHEMICAL DESCRIPTORS
 ########################################################
 
-lf = tm.LSHForest(1024, 64)
-lf.restore(
-    "../../data/interim/tmap/210506_lotus_2D_map4.dat")  # Version "210312_lotus.dat" contains 270'336 resulting from 210223_frozen_metadata groupby(structure_wikidata)
+# lf = tm.LSHForest(1024, 64)
+# lf.restore(
+#     "../../data/interim/tmap/210506_lotus_2D_map4.dat")  # Version "210312_lotus.dat" contains 270'336 resulting from 210223_frozen_metadata groupby(structure_wikidata)
 
-hac, c_frac, ring_atom_frac, largest_ring_size = pickle.load(
-    open("../../data/interim/tmap/210506_lotus_2D_map4.pickle", "rb")
-)
-
-# tmap configuration
-
-cfg = tm.LayoutConfiguration()
-cfg.k = 20
-cfg.sl_extra_scaling_steps = 10
-cfg.node_size = 1 / 50
-cfg.mmm_repeats = 2
-cfg.sl_repeats = 2
-
-# tmap generation
-x, y, s, t, _ = tm.layout_from_lsh_forest(lf, cfg)
-
-# To store coordinates
-# x = list(x)
-# y = list(y)
-# s = list(s)
-# t = list(t)
-# pickle.dump(
-#     (x, y, s, t), open("../data/interim/tmap/210505_coords_lotus_2D_map4.dat", "wb+"), protocol=pickle.HIGHEST_PROTOCOL
+# hac, c_frac, ring_atom_frac, largest_ring_size = pickle.load(
+#     open("../../data/interim/tmap/210506_lotus_2D_map4.pickle", "rb")
 # )
 
-del (lf)
+# # tmap configuration
+
+# cfg = tm.LayoutConfiguration()
+# cfg.k = 20
+# cfg.sl_extra_scaling_steps = 10
+# cfg.node_size = 1 / 50
+# cfg.mmm_repeats = 2
+# cfg.sl_repeats = 2
+
+# # tmap generation
+# x, y, s, t, _ = tm.layout_from_lsh_forest(lf, cfg)
+
+# # To store coordinates
+# # x = list(x)
+# # y = list(y)
+# # s = list(s)
+# # t = list(t)
+# # pickle.dump(
+# #     (x, y, s, t), open("../data/interim/tmap/210505_coords_lotus_2D_map4.dat", "wb+"), protocol=pickle.HIGHEST_PROTOCOL
+# # )
+
+# del (lf)
 
 ########################################################
 # OPTION 3: LOAD PRE-COMPUTED COORDINATES, SOURCES AND TARGETS
