@@ -1,17 +1,32 @@
 name: pf_datanote
 channels:
+  - conda-forge
+  - bioconda
   - defaults
+  - tmap
 dependencies:
   - python=3.9
-  - tmap
+  - ipykernel
   - faerun
   - pandas
   - pip
   - pip:
     - git+https://github.com/reymond-group/map4
-  - scipy
   - matplotlib
-  - ipykernel
+  - plotly
   - rdkit
   - requests
-  - plotly
+  - scipy
+  - tmap
+  - r-aplot ## needed by ggtree
+  - r-base
+  - r-circlize
+  - r-dplyr
+  - r-ggfortify
+  - r-gridExtra
+  - r-igraph
+  - r-plyr
+  - r-readr
+  - r-rotl
+  - r-rvcheck ## needed by ggtree
+  - r-tidytree ## needed by ggtree
