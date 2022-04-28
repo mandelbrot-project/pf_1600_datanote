@@ -78,16 +78,19 @@ from pathlib import Path
 p = Path(__file__).parents[1]
 os.chdir(p)
 
+tmp_path = 'tmp/'
+
 # input files 
 
 lotus_annotations_filename = '220318_frozen_metadata.csv.gz'
 dataset_annotations_filename = 'PF_full_datanote_spectral_match_results_repond_flat.tsv'
-
+lotus_annotations_path = tmp_path + lotus_annotations_filename
+dataset_annotations_path = tmp_path + dataset_annotations_filename
 # tmap outputs
 
-lf_store_path = '20220428_pf_set_annotation_vs_lotus.dat'
-set_attributes_path = "20220428_pf_set_annotation_vs_lotus_attributes.pickle"
-set_coordinates_path = "20220428_pf_set_annotation_vs_lotus_coords.dat"
+lf_store_path = tmp_path + '20220428_pf_set_annotation_vs_lotus.dat'
+set_attributes_path = tmp_path + "20220428_pf_set_annotation_vs_lotus_attributes.pickle"
+set_coordinates_path = tmp_path + "20220428_pf_set_annotation_vs_lotus_coords.dat"
 
 tmap_filename = '20220428_annotations_vs_lotus_tmap'
 
