@@ -99,7 +99,7 @@ metadata_df.feature_id = metadata_df.scans.astype(int)
 ### merging with the additional metadata
 metadata_df = pd.merge(metadata_df[['feature_id']], max_taxon_df, left_on = "feature_id", right_on='row ID', how="left")
 metadata_df['has_isdb_smiles'] = np.where(pd.isnull(metadata_df['structure_smiles']), 'No', 'Yes')
-#metadata_df.structure_smiles = metadata_df.structure_smiles.fillna('C')
+metadata_df.structure_smiles = metadata_df.structure_smiles.fillna('O1CCOC1c1c(C#CC(C)(C)C)cc(c(C#CC(C)(C)C)c1)C#Cc1cc(C#CCCC)cc(C#CCCC)c1')
 metadata_df.fillna('None',inplace=True)
 metadata_df.componentindex = metadata_df.componentindex.astype(str)
 metadata_df.score_taxo = metadata_df.score_taxo.astype(str)
@@ -329,7 +329,7 @@ cmap7 = mcolors.ListedColormap(['#e6e6e6', "#023047"])
 
 cmap_sel_fam = mcolors.ListedColormap(['#e6e6e6', '#ef476f', '#ffd166', '#06d6a0', '#118ab2', '#073b4c'])
 
-cmap_sel_sc = mcolors.ListedColormap(['#e6e6e6', '#457b9d', '#43aa8b', '#997b66', '#e8ac65', '#786150'])
+cmap_sel_sc = mcolors.ListedColormap(['#e6e6e6', '#457b9d', '#43aa8b', '#786150', '#e8ac65', '#ffd60a'])
 
 cmap_sel_c = mcolors.ListedColormap(['#e6e6e6', '#2a9d8f', '#FF8C61', '#bc6c25'])
 
@@ -477,7 +477,7 @@ f.add_tree("tree",
            point_helper="attributes",
            color='#a89e9e'
            )
-f.plot( "220408_VGF_samples_spectral_tmap_pos",
+f.plot( "220427_VGF_samples_spectral_tmap_pos",
        template="smiles"
 )
 
