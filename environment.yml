@@ -11,7 +11,5 @@ dependencies:
   - matplotlib
   - ipykernel
   - rdkit
-  - wget
   - requests
   - plotly
-prefix: /home/allardpm/anaconda3/envs/pf_datanote
