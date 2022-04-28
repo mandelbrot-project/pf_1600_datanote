@@ -12,8 +12,7 @@ import tmap as tm
 from faerun import Faerun
 from map4 import MAP4Calculator
 from rdkit.Chem import AllChem
-import wget
-import request
+import requests
 
 # Define useful functions:
 
@@ -71,10 +70,20 @@ def keep_only_given_class(to_keep=[], input_data=[], input_labels=[]):
 ### PART 0: Defining pathes ###
 ########################################################
 
-lotus_annotations_path = '/Users/pma/01_large_files/tabular/210523_lotus_dnp_metadata.csv'
-dataset_annotations_path = '/Users/pma/Dropbox/git_repos/mandelbrot_project/met_annot_enhancer/data_out/PF_full_datanote/PF_full_datanote_spectral_match_results_repond_flat.tsv'
+lotus_annotations_path = '220318_frozen_metadata.csv.gz'
+dataset_annotations_path = 'PF_full_datanote_spectral_match_results_repond_flat.tsv'
 
 !wget https://zenodo.org/record/6378204/files/220318_frozen_metadata.csv.gz?download=1
+
+URL = "https://zenodo.org/record/6378204/files/220318_frozen_metadata.csv.gz"
+response = requests.get(URL)
+open("220318_frozen_metadata.csv.gz", "wb").write(response.content)
+
+
+URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-04-28_pmallard_b0e0f70c/other/PF_full_datanote/PF_full_datanote_spectral_match_results_repond_flat.tsv"
+response = requests.get(URL)
+open("PF_full_datanote_spectral_match_results_repond_flat.tsv", "wb").write(response.content)
+
 
 ########################################################
 ### PART 1: LOAD Lotus and transform for plotting ###
@@ -240,7 +249,7 @@ for i, row in df_merged.iterrows():
     sys.stdout.write('\r')
     sys.stdout.write(f"[{'=' * int(50 * j):{50}s}] {round((100 * j), 2)}%")
     sys.stdout.flush()
-    sleep(0.05)
+    sleep(0.0005)
 
     mol = AllChem.MolFromSmiles(row["structure_smiles_2D"])
     atoms = mol.GetAtoms()
