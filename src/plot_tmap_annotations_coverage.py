@@ -12,7 +12,8 @@ import tmap as tm
 from faerun import Faerun
 from map4 import MAP4Calculator
 from rdkit.Chem import AllChem
-
+import wget
+import request
 
 # Define useful functions:
 
@@ -67,12 +68,21 @@ def keep_only_given_class(to_keep=[], input_data=[], input_labels=[]):
 
 
 ########################################################
+### PART 0: Defining pathes ###
+########################################################
+
+lotus_annotations_path = '/Users/pma/01_large_files/tabular/210523_lotus_dnp_metadata.csv'
+dataset_annotations_path = '/Users/pma/Dropbox/git_repos/mandelbrot_project/met_annot_enhancer/data_out/PF_full_datanote/PF_full_datanote_spectral_match_results_repond_flat.tsv'
+
+!wget https://zenodo.org/record/6378204/files/220318_frozen_metadata.csv.gz?download=1
+
+########################################################
 ### PART 1: LOAD Lotus and transform for plotting ###
 ########################################################
 
 # Load lotus
 df_meta = pd.read_csv(
-    '210523_lotus_dnp_metadata.csv',
+    lotus_annotations_path,
     usecols=['organism_taxonomy_02kingdom', 'structure_smiles', 'structure_smiles_2D', 'structure_taxonomy_npclassifier_01pathway',
     'structure_taxonomy_npclassifier_02superclass', 'structure_taxonomy_npclassifier_03class'],
     sep=",")
@@ -91,7 +101,7 @@ df_meta = df_meta.drop_duplicates(subset=['structure_smiles_2D'])
 ########################################################
 
 # Load annotations
-df_annotations = pd.read_csv('PF_full_datanote_spectral_match_results_repond_flat.tsv', usecols=['structure_smiles', 'score_taxo', 'structure_taxonomy_npclassifier_01pathway', 'structure_taxonomy_npclassifier_02superclass', 'structure_taxonomy_npclassifier_03class'], low_memory=False, sep="\t")
+df_annotations = pd.read_csv(dataset_annotations_path, usecols=['structure_smiles', 'score_taxo', 'structure_taxonomy_npclassifier_01pathway', 'structure_taxonomy_npclassifier_02superclass', 'structure_taxonomy_npclassifier_03class'], low_memory=False, sep="\t")
 
 df_annotations = df_annotations[df_annotations['score_taxo'] > 0] # Keep only reweighted annotations
 
