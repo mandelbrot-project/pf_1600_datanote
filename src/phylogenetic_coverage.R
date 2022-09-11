@@ -75,14 +75,14 @@ usePackage("archive")
 # https://tree.opentreeoflife.org/about/taxonomy-version/ott3.3
 
 # File can bve directly downloaded 
-download.file('http://files.opentreeoflife.org/ott/ott3.3/ott3.3.tgz', destfile = "data/inputs/ott3.3.tgz", method = "wget", extra = "-r -p --random-wait")
+download.file('http://files.opentreeoflife.org/ott/ott3.3/ott3.3.tgz', destfile = "docs/data/inputs/ott3.3.tgz", method = "wget", extra = "-r -p --random-wait")
 
 # and opened from the tar archive
 
-taxonomy <- read_delim(archive_read("data/inputs/ott3.3.tgz", file = "ott3.3/taxonomy.tsv"), col_types = cols(), delim = "|", escape_double = FALSE, trim_ws = TRUE )
+taxonomy <- read_delim(archive_read("docs/data/inputs/ott3.3.tgz", file = "ott3.3/taxonomy.tsv"), col_types = cols(), delim = "|", escape_double = FALSE, trim_ws = TRUE )
 
 
-PF_d <- read_delim("data/inputs/pf_metadata_otoled.tsv", delim = "\t", escape_double = FALSE, trim_ws = TRUE)
+PF_d <- read_delim("docs/data/inputs/pf_metadata_otoled.tsv", delim = "\t", escape_double = FALSE, trim_ws = TRUE)
 
 
 
@@ -122,11 +122,12 @@ taxonomy_final <- taxonomy[taxonomy$uid %in% id_sel,]
 taxonomy_family <- taxonomy_final %>% 
                        filter(rank == "family" & is.na(flags)) 
                        
+# Ucomment the two following line if you need to launch tax_lineage() again
 
 # taxonomy_family_lineage <- tax_lineage(taxonomy_taxon_info(taxonomy_family$uid, include_lineage = TRUE))  
-# saveRDS(taxonomy_family_lineage, file="data/tmp/taxonomy_family_lineage.RData")
+# saveRDS(taxonomy_family_lineage, file="docs/data/tmp/taxonomy_family_lineage.RData")
 
-taxonomy_family_lineage <- readRDS(file="data/tmp/taxonomy_family_lineage.RData")
+taxonomy_family_lineage <- readRDS(file="docs/data/tmp/taxonomy_family_lineage.RData")
 
 
 taxonomy_family_lineage_matt <- ldply(taxonomy_family_lineage,rbind)
@@ -166,11 +167,12 @@ length(unique(taxonomy_family_full$name.family))
 
 PF_d2 <- PF_d[!is.na(PF_d$taxon.ott_id),]
 
+# Ucomment the two following line if you need to launch tax_lineage() again
+
 # taxonomy_family_lineage_pf <- tax_lineage(taxonomy_taxon_info(PF_d2$taxon.ott_id, include_lineage = TRUE))  
+ #saveRDS(taxonomy_family_lineage_pf, file="docs/data/tmp/taxonomy_family_lineage_pf.RData")
 
- #saveRDS(taxonomy_family_lineage_pf, file="data/tmp/taxonomy_family_lineage_pf.RData")
-
- taxonomy_family_lineage_pf <- readRDS(file="data/tmp/taxonomy_family_lineage_pf.RData")
+ taxonomy_family_lineage_pf <- readRDS(file="docs/data/tmp/taxonomy_family_lineage_pf.RData")
 
 
 taxonomy_family_lineage_pf_matt <- ldply(taxonomy_family_lineage_pf,rbind)
@@ -309,12 +311,12 @@ taxonomy_genus <- taxonomy_final %>%
 
 length(unique(taxonomy_genus$))
 
+# Ucomment the two following line if you need to launch tax_lineage() again
 
 # taxonomy_genus_lineage <- tax_lineage(taxonomy_taxon_info(taxonomy_genus$uid, include_lineage = TRUE))  
+# saveRDS(taxonomy_genus_lineage, file="docs/data/tmp/taxonomy_genus_lineage.RData")
 
-# saveRDS(taxonomy_genus_lineage, file="data/tmp/taxonomy_genus_lineage.RData")
-
-taxonomy_genus_lineage <- readRDS(file="data/tmp/taxonomy_genus_lineage.RData")
+taxonomy_genus_lineage <- readRDS(file="docs/data/tmp/taxonomy_genus_lineage.RData")
 
 
 taxonomy_genus_lineage_matt <- ldply(taxonomy_genus_lineage,rbind)
@@ -403,7 +405,7 @@ titlex <-  ggplot()+ xlim(0,1) +ylim(0,1) + theme_void() +
  grid.arrange(p1,g1, nrow = 2,widths = c(1,2),
              layout_matrix = rbind(c(1,2), c(1,2)))
 
-pdf(file = "data/outputs/taxo_plot.pdf",   # The directory you want to save the file in
+pdf(file = "docs/data/outputs/taxo_plot.pdf",   # The directory you want to save the file in
     width = 13, # The width of the plot in inches
     height = 8)
 
@@ -453,7 +455,7 @@ taxo_merger_genus$value <- rep(1,nrow(taxo_merger_genus))
 
 
 
-pdf(file = "data/outputs/family_coverage_plot.pdf",   # The directory you want to save the file in
+pdf(file = "docs/data/outputs/family_coverage_plot.pdf",   # The directory you want to save the file in
     width = 13, # The width of the plot in inches
     height = 8)
 
@@ -472,7 +474,7 @@ p3
 
 dev.off()
 
-pdf(file = "data/outputs/order_coverage_plot.pdf",   # The directory you want to save the file in
+pdf(file = "docs/data/outputs/order_coverage_plot.pdf",   # The directory you want to save the file in
     width = 13, # The width of the plot in inches
     height = 8) 
 
@@ -497,7 +499,7 @@ p3_ly <- ggplotly(p3,dynamicTicks = TRUE,tooltip = c("text"))
 p3_ly %>%
         layout(legend = list(title=list(text='Presence in dataset')), hoverinfo = 'Family')
 
-setwd("data/outputs")
+setwd("docs/data/outputs")
 p3_ly %>% 
   htmlwidgets::saveWidget(file="family_coverage_plot.html", selfcontained = TRUE)
 system('rm -r family_coverage_plot_files')
@@ -508,7 +510,7 @@ p4_ly <- ggplotly(p4,dynamicTicks = TRUE,tooltip = c("text"))
 p4_ly %>%
         layout(legend = list(title=list(text='Presence in dataset')), hoverinfo = 'Family')
 
-setwd("data/outputs")
+setwd("docs/data/outputs")
 p4_ly %>% 
   htmlwidgets::saveWidget(file="order_coverage_plot.html", selfcontained = TRUE)
 system('rm -r order_coverage_plot_files')
