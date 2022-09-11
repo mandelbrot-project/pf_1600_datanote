@@ -29,6 +29,46 @@ usePackage("plotly")
 usePackage("archive")
 
 
+##### Session Infos
+
+> sessionInfo()
+
+# R version 4.1.3 (2022-03-10)
+# Platform: x86_64-apple-darwin17.0 (64-bit)
+# Running under: macOS Big Sur/Monterey 10.16
+
+# Matrix products: default
+# BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+# LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
+
+# locale:
+# [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+# attached base packages:
+# [1] stats     graphics  grDevices utils     datasets  methods   base     
+
+# other attached packages:
+#  [1] archive_1.1.5    plotly_4.10.0    ggtree_3.2.1     ggfortify_0.4.14
+#  [5] ggplot2_3.3.6    gridExtra_2.3    plyr_1.8.7       igraph_1.3.4    
+#  [9] dplyr_1.0.10     readr_2.1.2      rotl_3.0.12     
+
+# loaded via a namespace (and not attached):
+#  [1] treeio_1.18.1      progress_1.2.2     tidyselect_1.1.2   purrr_0.3.4       
+#  [5] lattice_0.20-45    ggfun_0.0.5        colorspace_2.0-3   vctrs_0.4.1       
+#  [9] generics_0.1.3     viridisLite_0.4.1  htmltools_0.5.3    utf8_1.2.2        
+# [13] XML_3.99-0.10      gridGraphics_0.5-1 rlang_1.0.5        pillar_1.8.1      
+# [17] glue_1.6.2         withr_2.5.0        DBI_1.1.3          rentrez_1.2.3     
+# [21] lifecycle_1.0.1    stringr_1.4.1      munsell_0.5.0      gtable_0.3.1      
+# [25] htmlwidgets_1.5.4  fastmap_1.1.0      tzdb_0.2.0         parallel_4.1.3    
+# [29] fansi_1.0.3        Rcpp_1.0.9         scales_1.2.1       jsonlite_1.8.0    
+# [33] digest_0.6.29      hms_1.1.2          aplot_0.1.2        rncl_0.8.6        
+# [37] stringi_1.7.8      grid_4.1.3         cli_3.3.0          tools_4.1.3       
+# [41] yulab.utils_0.0.4  magrittr_2.0.3     lazyeval_0.2.2     patchwork_1.1.1   
+# [45] tibble_3.1.8       crayon_1.5.1       ape_5.6-2          tidyr_1.2.0       
+# [49] pkgconfig_2.0.3    tidytree_0.3.9     ellipsis_0.3.2     data.table_1.14.2 
+# [53] ggplotify_0.1.0    prettyunits_1.1.1  assertthat_0.2.1   httr_1.4.4        
+# [57] R6_2.5.1           nlme_3.1-155       compiler_4.1.3    
+
   ###############  
 
 # The full taxo is downloaded from OTL 
