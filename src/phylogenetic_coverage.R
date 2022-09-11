@@ -31,7 +31,7 @@ usePackage("archive")
 
 ##### Session Infos
 
-> sessionInfo()
+sessionInfo()
 
 # R version 4.1.3 (2022-03-10)
 # Platform: x86_64-apple-darwin17.0 (64-bit)
@@ -74,8 +74,8 @@ usePackage("archive")
 # The full taxo is downloaded from OTL 
 # https://tree.opentreeoflife.org/about/taxonomy-version/ott3.3
 
-# File can bve directly downloaded 
-download.file('http://files.opentreeoflife.org/ott/ott3.3/ott3.3.tgz', destfile = "docs/data/inputs/ott3.3.tgz", method = "wget", extra = "-r -p --random-wait")
+# File can be directly downloaded 
+# download.file('http://files.opentreeoflife.org/ott/ott3.3/ott3.3.tgz', destfile = "docs/data/inputs/ott3.3.tgz", method = "wget", extra = "-r -p --random-wait")
 
 # and opened from the tar archive
 
@@ -122,7 +122,7 @@ taxonomy_final <- taxonomy[taxonomy$uid %in% id_sel,]
 taxonomy_family <- taxonomy_final %>% 
                        filter(rank == "family" & is.na(flags)) 
                        
-# Ucomment the two following line if you need to launch tax_lineage() again
+# Uncomment the two following line if you need to launch tax_lineage() again
 
 # taxonomy_family_lineage <- tax_lineage(taxonomy_taxon_info(taxonomy_family$uid, include_lineage = TRUE))  
 # saveRDS(taxonomy_family_lineage, file="docs/data/tmp/taxonomy_family_lineage.RData")
@@ -167,12 +167,12 @@ length(unique(taxonomy_family_full$name.family))
 
 PF_d2 <- PF_d[!is.na(PF_d$taxon.ott_id),]
 
-# Ucomment the two following line if you need to launch tax_lineage() again
+# Uncomment the two following line if you need to launch tax_lineage() again
 
 # taxonomy_family_lineage_pf <- tax_lineage(taxonomy_taxon_info(PF_d2$taxon.ott_id, include_lineage = TRUE))  
  #saveRDS(taxonomy_family_lineage_pf, file="docs/data/tmp/taxonomy_family_lineage_pf.RData")
 
- taxonomy_family_lineage_pf <- readRDS(file="docs/data/tmp/taxonomy_family_lineage_pf.RData")
+taxonomy_family_lineage_pf <- readRDS(file="docs/data/tmp/taxonomy_family_lineage_pf.RData")
 
 
 taxonomy_family_lineage_pf_matt <- ldply(taxonomy_family_lineage_pf,rbind)
@@ -220,7 +220,7 @@ species_order_tab <- data.frame(taxonomy_pf_merge$name,taxonomy_pf_merge$unique_
 colnames(species_order_tab) <- c("family","order")
 
 
-####detecte and exclude family error in MRCA
+#### detect and exclude family error in MRCA
 
 family <- species_order_tab$family
 fam_mrca <- tapply(family,family,function(x) return(tryCatch(MRCA(tree_plot, x),error=function(e) NULL)))
@@ -309,9 +309,9 @@ g1$data[1]
 taxonomy_genus <- taxonomy_final %>% 
   filter(rank == "genus" & is.na(flags)) 
 
-length(unique(taxonomy_genus$))
+# length(unique(taxonomy_genus$))
 
-# Ucomment the two following line if you need to launch tax_lineage() again
+# Uncomment the two following line if you need to launch tax_lineage() again
 
 # taxonomy_genus_lineage <- tax_lineage(taxonomy_taxon_info(taxonomy_genus$uid, include_lineage = TRUE))  
 # saveRDS(taxonomy_genus_lineage, file="docs/data/tmp/taxonomy_genus_lineage.RData")
@@ -337,7 +337,7 @@ taxonomy_genus_full <-
   left_join(taxonomy_genus,taxonomy_genus_lineage_wide,by=c("uid" = ".id"))
 taxonomy_genus_full$uid <- as.character(taxonomy_genus_full$uid)
 
-length(unique(taxonomy_genus_full$))
+# length(unique(taxonomy_genus_full$))
 
 sp_name_matt <- subset(PF_d2,select=c(taxon.ott_id, taxon.name))
 sp_name_matt$taxon.ott_id = as.character(sp_name_matt$taxon.ott_id)
@@ -478,7 +478,7 @@ pdf(file = "docs/data/outputs/order_coverage_plot.pdf",   # The directory you wa
     width = 13, # The width of the plot in inches
     height = 8) 
 
-p4 <- ggplot(taxo_merger_fam, aes(y = value, fill = as.factor(ratio_fam), x = reorder(name.order.x, -order_size),text = name.order.x)) +
+p4 <- ggplot(taxo_merger_fam, aes(y = value, fill = as.factor(ratio_fam), x = reorder(name.order.x, -order_size), text = name.order.x)) +
   geom_bar(stat = "identity", width = 0.5, position = "stack") +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 5)) +
@@ -494,23 +494,28 @@ p4
 dev.off()
 
 
-
 p3_ly <- ggplotly(p3,dynamicTicks = TRUE,tooltip = c("text"))
-p3_ly %>%
+p3_ly <- p3_ly %>%
         layout(legend = list(title=list(text='Presence in dataset')), hoverinfo = 'Family')
 
-setwd("docs/data/outputs")
-p3_ly %>% 
-  htmlwidgets::saveWidget(file="family_coverage_plot.html", selfcontained = TRUE)
-system('rm -r family_coverage_plot_files')
+p3_ly$x$labels
 
+
+# setwd("docs/data/outputs")
+# p3_ly %>% 
+#   htmlwidgets::saveWidget(file="docs/data/outputs/family_coverage_plot.html", selfcontained = FALSE)
+# system('rm -r family_coverage_plot_files')
+
+htmlwidgets::saveWidget(as_widget(p3_ly), "docs/data/outputs/family_coverage_plot.html")
 
 
 p4_ly <- ggplotly(p4,dynamicTicks = TRUE,tooltip = c("text"))
-p4_ly %>%
+p4_ly <- p4_ly %>%
         layout(legend = list(title=list(text='Presence in dataset')), hoverinfo = 'Family')
 
-setwd("docs/data/outputs")
-p4_ly %>% 
-  htmlwidgets::saveWidget(file="order_coverage_plot.html", selfcontained = TRUE)
-system('rm -r order_coverage_plot_files')
+# setwd("docs/data/outputs")
+# p4_ly %>% 
+#   htmlwidgets::saveWidget(file="docs/data/outputs/order_coverage_plot.html", selfcontained = TRUE)
+# system('rm -r order_coverage_plot_files')
+
+htmlwidgets::saveWidget(as_widget(p4_ly), "docs/data/outputs/order_coverage_plot.html")
