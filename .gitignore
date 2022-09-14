@@ -5,6 +5,7 @@
 *.tsv
 *.pptx
 *.cdx
+*.tgz
 tmp
 .DS_Store
 .vscode
