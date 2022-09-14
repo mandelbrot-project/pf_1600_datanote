@@ -1,6 +1,10 @@
 import pandas as pd
 import pickle
-from matchms.filtering import add_parent_mass
+import os
+import requests
+import subprocess
+import shlex
+import zipfile
 from matchms.filtering import add_losses
 from matchms.filtering import normalize_intensities
 from matchms.filtering import require_minimum_number_of_peaks
@@ -18,38 +22,107 @@ from matplotlib import pyplot as plt
 from matplotlib import cm
 import matplotlib.colors as mcolors
 
-#from sklearn import preprocessing
+#########################################################
+###  PART 0: Defining paths and download input files  ###
+#########################################################
 
-### PART 1: IMPORT AND CLEAN SPECTRA + METADATA and CONVERT SPECTRA TO DOCUMENTS ###
+# These lines allows to make sure that we are placed at the repo directory level 
+from pathlib import Path
 
-# Spectra processing: https://matchms.readthedocs.io/en/latest/api/matchms.filtering.html for help
+p = Path(__file__).parents[1]
+os.chdir(p)
+
+tmp_path = 'tmp/'
+
+# input files 
+
+dataset_annotations_filename = 'PF_full_datanote_spectral_match_results_repond_flat.tsv'
+dataset_annotations_path = tmp_path + dataset_annotations_filename
+
+Metadata_filename = 'plant_extract_dataset_metadata.tsv'
+Metadata_path = tmp_path + Metadata_filename
+
+feature_table_filename = '210302_feature_list_filtered_strong_aligned_cosine03_quant_without_QCs_and_Blanks.csv'
+feature_table_path = tmp_path + feature_table_filename
+
+spectra_filename = '210302_feature_list_filtered_strong_aligned_cosine03_without_QCs_and_Blanks.mgf'
+spectra_path = tmp_path + spectra_filename
+
+component_index_filename = 'gnps_job/clusterinfosummarygroup_attributes_withIDs_withcomponentID/5babd364facf4f46aa8a2ae8e3b9c6bb.clustersummary'
+component_index_path = tmp_path + component_index_filename
+
+# tmap outputs
+set_coordinates_path = tmp_path + "220419_pf_set_pectral_coord.dat"
+
+tmap_filename = '220427_VGF_samples_spectral_tmap_pos'
+
+# outputs folder
+
+output_folder = 'docs/'
+image_output_folder = 'docs/img/'
+
+#downloading required inputs
+
+# ISDB annotations
+URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-04-28_pmallard_b0e0f70c/other/PF_full_datanote/PF_full_datanote_spectral_match_results_repond_flat.tsv"
+response = requests.get(URL)
+open(dataset_annotations_path, "wb").write(response.content)
+
+# Metadata
+URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2021-12-21_pmallard_cde57c76/metadata/211221_metadata_vgf.tsv"
+response = requests.get(URL)
+open(Metadata_path, "wb").write(response.content)
+
+# Spectra
+URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-09-14_pmallard_c2fb482f/other/210302_feature_list_filtered_strong_aligned_cosine03_without_QCs_and_Blanks.mgf"
+response = requests.get(URL)
+open(spectra_path, "wb").write(response.content)
+
+# Feature table
+URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-09-14_pmallard_c2fb482f/other/210302_feature_list_filtered_strong_aligned_cosine03_quant_without_QCs_and_Blanks.csv"
+response = requests.get(URL)
+open(feature_table_path, "wb").write(response.content)
+
+# Componentindex
+path_to_file = tmp_path + 'gnps_job.zip'
+path_to_folder = tmp_path + 'gnps_job/'
+job_url_zip = "https://gnps.ucsd.edu/ProteoSAFe/DownloadResult?task="+"3197f70bed224f9ba6f59f62906839e9"+"&view=download_cytoscape_data"
+cmd = 'curl -d "" ' + job_url_zip + ' -o '+ path_to_file + ' --create-dirs'
+subprocess.call(shlex.split(cmd))
+with zipfile.ZipFile(path_to_file, 'r') as zip_ref:
+    zip_ref.extractall(path_to_folder)
+os.remove(path_to_file)
+
+#########################################################
+###               PART 1: IMPORT DATA                 ###
+#########################################################
+
+# Spectra processing function
 def apply_my_filters(s):
     """This is how one would typically design a desired pre- and post-
     processing pipeline."""
-    # s = default_filters(s)
-    # s = add_parent_mass(s)
     s = normalize_intensities(s)
     s = select_by_relative_intensity(s, intensity_from = 0.01, intensity_to = 1.0)
-    #s = reduce_to_number_of_peaks(s, n_required=10, ratio_desired=0.5)
-    #s = select_by_mz(s, mz_from=0, mz_to=1500)
     s = add_losses(s, loss_mz_from=10.0, loss_mz_to=400.0)
     s = require_minimum_number_of_peaks(s, n_required=5)
     return s
 
 # Load samples metadata
-optional_meta = pd.read_csv("/mnt/c/Users/gaudrya.FARMA/Desktop/VGF_pos_new_treatment/plant_extract_dataset_metadata.tsv", sep = '\t', usecols=[
-    'sample_id', 'organism_phylum', 'organism_class', 'organism_order', 'organism_family', 'organism_genus', 'organism_species'
+optional_meta = pd.read_csv(Metadata_path, sep = '\t', usecols=[
+    'sample_id', 'organism_phylum', 'organism_class', 'organism_order', 'organism_family',\
+    'organism_genus', 'organism_species'
 ])
+
 optional_meta.dropna(inplace=True)
 
 # Load feature table
-quant_table = pd.read_csv("/mnt/c/Users/gaudrya.FARMA/Desktop/VGF_pos_new_treatment/210302_feature_list_filtered_strong_aligned_cosine03_quant_without_QCs_and_Blanks.csv")
+quant_table = pd.read_csv(feature_table_path)
 quant_table.columns = quant_table.columns.str.replace(".mzXML", "")
 
 # save RT and m/z for later use
 quant_table_rt_mz_index = quant_table[['row ID', 'cluster_index', 'row retention time', 'row m/z']].set_index('cluster_index', drop=True)
 
-''' Get the taxon with the maximal mean intensity for each feature '''
+''' Get the taxon with the maximal MEAN intensity for each feature '''
 
 # quant_table.set_index('cluster_index', drop=True, inplace=True)
 # samples_col = [col for col in quant_table.columns if 'VGF' in col]
@@ -66,11 +139,10 @@ quant_table_rt_mz_index = quant_table[['row ID', 'cluster_index', 'row retention
 samples_col = [col for col in quant_table.columns if 'VGF' in col]
 quant_table['max'] = quant_table[samples_col].idxmax(axis=1)
 max_taxon_df = quant_table[['cluster_index', 'row ID','row retention time', 'row m/z', 'max']].merge(optional_meta, left_on = 'max', right_on = 'sample_id', how='left')
-#max_taxon_df = pd.DataFrame(max_taxon).merge(quant_table_rt_mz_index, left_index=True, right_index=True)
 
 ''' Load component index from GNPS job '''
 component_index = pd.read_csv(
-    "/mnt/c/users/gaudrya.FARMA/Desktop/VGF_pos_new_treatment/ProteoSAFe-METABOLOMICS-SNETS-V2-3197f70b-download_clustered_spectra/clusterinfosummarygroup_attributes_withIDs_withcomponentID/5babd364facf4f46aa8a2ae8e3b9c6bb.clustersummary",
+    component_index_path,
     sep = '\t', usecols=['cluster index', 'componentindex', 'Smiles']
     )
 
@@ -79,16 +151,15 @@ max_taxon_df = max_taxon_df.rename(columns={'Smiles': 'gnps_smiles'}).drop('clus
 max_taxon_df['has_gnps_smiles'] = np.where(pd.isnull(max_taxon_df['gnps_smiles']), 'No', 'Yes')
 
 ''' Load ISDB annotations '''
-df_annotations = pd.read_csv('PF_full_datanote_spectral_match_results_repond_flat.tsv', usecols=['feature_id', 'structure_smiles', 'score_taxo', 'structure_taxonomy_npclassifier_01pathway', 'structure_taxonomy_npclassifier_02superclass', 'structure_taxonomy_npclassifier_03class'], low_memory=False, sep="\t")
+df_annotations = pd.read_csv(dataset_annotations_path, usecols=['feature_id', 'structure_smiles', 'score_taxo', 'structure_taxonomy_npclassifier_01pathway', 'structure_taxonomy_npclassifier_02superclass', 'structure_taxonomy_npclassifier_03class'], low_memory=False, sep="\t")
 df_annotations = df_annotations[df_annotations['score_taxo'] > 0] # Keep only reweighted annotations
 df_annotations.drop_duplicates(subset = 'feature_id', inplace=True)
 
 
 max_taxon_df = max_taxon_df.merge(df_annotations, left_on = 'cluster_index', right_on='feature_id', how = 'left').drop('feature_id', axis=1)
 
-# Load data from MGF file and apply filters
-
-spectrums = [apply_my_filters(s) for s in load_from_mgf("/mnt/c/users/gaudrya.FARMA/Desktop/VGF_pos_new_treatment/210302_feature_list_filtered_strong_aligned_cosine03_without_QCs_and_Blanks.mgf")]
+# Load Spectra
+spectrums = [apply_my_filters(s) for s in load_from_mgf(spectra_path)]
 spectrums = [s for s in spectrums if s is not None]
 reference_documents = [SpectrumDocument(s, n_decimals=2) for s in spectrums]
 metadata_df = pd.DataFrame(s.metadata for s in spectrums)
@@ -111,15 +182,14 @@ texts = []
 for doc in reference_documents:
     texts.append(doc.words)
 
-
-### PART 2: SPECTRAL T-MAP ###
+#########################################################
+###             PART 2: SPECTRAL T-MAP                ###
+#########################################################
 
 # (Dirty) trick to pass from a counter object to a list
 ctr = Counter()
 for text in texts:
     ctr.update(text)
-# n = 0
-# ctr = ctr.most_common()[: -(len(ctr) - n) - 1 : -1]
 ctr = list(set(ctr))
 
 all_words = {}
@@ -128,42 +198,45 @@ for i, key in enumerate(ctr):
 
 ############ Un-weighted TMAP generation ###############
 
-# enc = tm.Minhash()
-# lf = tm.LSHForest()
+enc = tm.Minhash()
+lf = tm.LSHForest()
 
-# fingerprints = []
-# for text in texts:
-#     fingerprint = []
-#     for t in text:
-#         if t in all_words:
-#             fingerprint.append(all_words[t])
-#     fingerprints.append(tm.VectorUint(fingerprint))
+fingerprints = []
+for text in texts:
+    fingerprint = []
+    for t in text:
+        if t in all_words:
+            fingerprint.append(all_words[t])
+    fingerprints.append(tm.VectorUint(fingerprint))
 
-# lf.batch_add(enc.batch_from_sparse_binary_array(fingerprints))
-# lf.index()
+lf.batch_add(enc.batch_from_sparse_binary_array(fingerprints))
+lf.index()
 
-# config = tm.LayoutConfiguration()
-# # config.k = 50 #50
-# # config.k = 10 #50
-# config.node_size = 1 / 40 # 1/26
-# # config.mmm_repeats = 2 #2
-# # config.sl_extra_scaling_steps = 5 #5
-# # config.sl_scaling_type = tm.RelativeToDesiredLength #RelativeToAvgLength
+config = tm.LayoutConfiguration()
+# config.k = 50 #50
+# config.k = 10 #50
+config.node_size = 1 / 40 # 1/26
+# config.mmm_repeats = 2 #2
+# config.sl_extra_scaling_steps = 5 #5
+# config.sl_scaling_type = tm.RelativeToDesiredLength #RelativeToAvgLength
 
-# x, y, s, t, _ = tm.layout_from_lsh_forest(lf, config=config)
+x, y, s, t, _ = tm.layout_from_lsh_forest(lf, config=config)
 
-# x = list(x)
-# y = list(y)
-# s = list(s)
-# t = list(t)
-# pickle.dump(
-#     (x, y, s, t), open("220419_pf_set_pectral_coord.dat", "wb+"), protocol=pickle.HIGHEST_PROTOCOL
-# )
 
-# del (lf)
+# Save for further use
+x = list(x)
+y = list(y)
+s = list(s)
+t = list(t)
+pickle.dump(
+    (x, y, s, t), open("220419_pf_set_pectral_coord.dat", "wb+"), protocol=pickle.HIGHEST_PROTOCOL
+)
 
-x, y, s, t = pickle.load(open("220419_pf_set_pectral_coord.dat",
-                              "rb"))
+del (lf)
+
+# Load precomputed coordinates
+# x, y, s, t = pickle.load(open("220419_pf_set_pectral_coord.dat",
+#                               "rb"))
 
 
 #### Tmap categories to map
@@ -252,7 +325,6 @@ temp_labels, temp_data = Faerun.create_categories(metadata_df["structure_taxonom
 sel_c_data, sel_c_labels = selected_classes(['Pregnane steroids', 'Acetogenins', 'Limonoids'], temp_data, temp_labels)
 
 
-
 size_superclass = []
 for value in npc_superclass_data:
     if value in [7, 5]:
@@ -289,10 +361,6 @@ for value in sel_c_data:
         size_sel_c.append(1)
                 
 size = [1]*len(size_ci)
-
-# series_part = pd.Series(sorted_partition_001)
-# cluster_labels, cluster_data = Faerun.create_categories(series_part)
-# cluster_data, cluster_labels = Top_N_classes(19, cluster_data, cluster_labels)
 
 # Colors stuff
 tab_10 = cm.get_cmap("tab10")
@@ -477,7 +545,6 @@ f.add_tree("tree",
            point_helper="attributes",
            color='#a89e9e'
            )
-f.plot( "220427_VGF_samples_spectral_tmap_pos",
+f.plot(output_folder + tmap_filename,
        template="smiles"
 )
-
