@@ -142,7 +142,7 @@ taxonomy_family <- taxonomy_final %>%
 
 
 if (config$params$run_tax_lineage == TRUE) {
-  print(paste('Proceeding to tax_lineage() function and saving output as', paste0(config$paths$tmp, config$filenames$taxonomy_family_lineage)))
+  print(paste('Proceeding to tax_lineage() function. Be patient ! This can be long. Saving output as', paste0(config$paths$tmp, config$filenames$taxonomy_family_lineage)))
   taxonomy_family_lineage <- tax_lineage(taxonomy_taxon_info(taxonomy_family$uid, include_lineage = TRUE))
   saveRDS(taxonomy_family_lineage, file = paste0(config$paths$tmp, config$filenames$taxonomy_family_lineage))
 } else {
@@ -188,7 +188,7 @@ length(unique(taxonomy_family_full$name.family))
 pf_metadata2 <- pf_metadata[!is.na(pf_metadata$taxon.ott_id), ]
 
 if (config$params$run_tax_lineage == TRUE) {
-  print(paste('Proceeding to tax_lineage() function and saving output as', paste0(config$paths$tmp, config$filenames$taxonomy_family_lineage_pf)))
+  print(paste('Proceeding to tax_lineage() function. Be patient ! This can be long. Saving output as', paste0(config$paths$tmp, config$filenames$taxonomy_family_lineage_pf)))
   taxonomy_family_lineage_pf <- tax_lineage(taxonomy_taxon_info(pf_metadata2$taxon.ott_id, include_lineage = TRUE))
   saveRDS(taxonomy_family_lineage_pf, file = paste0(config$paths$tmp, config$filenames$taxonomy_family_lineage_pf))
 } else {
@@ -340,7 +340,7 @@ taxonomy_genus <- taxonomy_final %>%
 
 
 if (config$params$run_tax_lineage == TRUE) {
-  print(paste('Proceeding to tax_lineage() function and saving output as', paste0(config$paths$tmp, config$filenames$taxonomy_genus_lineage)))
+  print(paste('Proceeding to tax_lineage() function. Be patient ! This can be long. Saving output as', paste0(config$paths$tmp, config$filenames$taxonomy_genus_lineage)))
   taxonomy_genus_lineage <- tax_lineage(taxonomy_taxon_info(taxonomy_genus$uid, include_lineage = TRUE))
   saveRDS(taxonomy_genus_lineage, file = paste0(config$paths$tmp, config$filenames$taxonomy_genus_lineage))
 } else {

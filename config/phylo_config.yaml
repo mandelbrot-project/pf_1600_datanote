@@ -1,7 +1,7 @@
 params:
- download_otl : TRUE # Set to FALSE if you dont want to download the OTT taxonomy
- download_pf_metadata : TRUE # Set to FALSE if you dont want to download the PF1600 metadata
- run_tax_lineage : TRUE # Set to FALSE to use the saved .RData
+ download_otl : TRUE # Once downloaded, you can set to FALSE if you dont want to download the OTT taxonomy again and use the local file instead
+ download_pf_metadata : TRUE # Once downloaded, you can set to FALSE if you dont want to download the PF1600 metadata again and use the local file instead
+ run_tax_lineage : TRUE # Once run a first time, you can set to FALSE if you want to use the local files instead. Be patient for the first iteration !
 
 data:
  otl_url : http://files.opentreeoflife.org/ott/ott3.3/ott3.3.tgz # This is the url of the OTT taxonomy
