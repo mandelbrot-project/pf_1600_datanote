@@ -64,8 +64,9 @@ conda env create --file environment.yml
 conda activate pf_datanote
 ```
 
-3. Here are the instruction to calculate the phylogenetic coverage
+## Phylogenetic coverage calculation
 
+Here are the instruction to calculate the phylogenetic coverage of the PF1600 dataset.
 The resulting data is used to generate Figure 1. and the associated barplots
 
 
