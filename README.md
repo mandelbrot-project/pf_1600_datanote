@@ -77,6 +77,8 @@ The resulting data is used to generate Figure 1. and the associated barplots
 Rscript src/phylogenetic_coverage.R
 ```
 
+## Spectral TMAP establishment
+
 
 
 
