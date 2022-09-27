@@ -109,6 +109,6 @@ Rscript src/phylogenetic_coverage.R
 
 
 ## Contact
-* If you haven't joined the SF Brigade Slack, [you can do that here](http://c4sf.me/slack).  
-* Our slack channel is `#datasci-projectname`
-* Feel free to contact team leads with any questions or if you are interested in contributing!
+
+* If you have a problem to run the scripts please file an issue here https://github.com/mandelbrot-project/pf_1600_datanote/issues
+* Feel free to directly contribute to the code !
