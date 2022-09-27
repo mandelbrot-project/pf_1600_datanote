@@ -27,6 +27,7 @@ usePackage("ggfortify")
 usePackage("ggtree")
 usePackage("plotly")
 usePackage("archive")
+usePackage("yaml")
 
 
 ##### Session Infos
@@ -69,24 +70,39 @@ sessionInfo()
 # [53] ggplotify_0.1.0    prettyunits_1.1.1  assertthat_0.2.1   httr_1.4.4        
 # [57] R6_2.5.1           nlme_3.1-155       compiler_4.1.3    
 
-  ###############  
+  ###############
+
+# Loading the params from the yaml file
+
+
+config = yaml.load_file("config/phylo_config.yaml")
+
+config
+
 
 # The full taxo is downloaded from OTL 
 # https://tree.opentreeoflife.org/about/taxonomy-version/ott3.3
 
-# File can be directly downloaded 
-# download.file('http://files.opentreeoflife.org/ott/ott3.3/ott3.3.tgz', destfile = "docs/data/inputs/ott3.3.tgz", method = "wget", extra = "-r -p --random-wait")
+# This file can be directly downloaded 
+
+if (config$params$download_otl == TRUE) {
+download.file(url = config$data$otl_url, destfile = config$path$otl_local, method = "wget", extra = "-r -p --random-wait")
+}
 
 # and opened from the tar archive
 
-taxonomy <- read_delim(archive_read("docs/data/inputs/ott3.3.tgz", file = "ott3.3/taxonomy.tsv"), col_types = cols(), delim = "|", escape_double = FALSE, trim_ws = TRUE )
+taxonomy <- read_delim(archive_read(config$path$otl_local, file = "ott3.3/taxonomy.tsv"), col_types = cols(), delim = "|", escape_double = FALSE, trim_ws = TRUE )
 
 
-PF_d <- read_delim("docs/data/inputs/pf_metadata_otoled.tsv", delim = "\t", escape_double = FALSE, trim_ws = TRUE)
+# The metadata can alse be directly downloaded 
+
+if (config$params$download_pf_metadata == TRUE) {
+download.file(url = config$data$pf_metadata_url, destfile = config$path$pf_metadata_local, method = "wget", extra = "-r -p --random-wait")
+}
+
+pf_metadata <- read_delim(config$path$pf_metadata_local, delim = "\t", escape_double = FALSE, trim_ws = TRUE)
 
 
-
-#taxonomy <- taxonomy[2:1000, ]
 
 taxonomy %>% 
   filter(rank =="domain")
@@ -106,7 +122,7 @@ g <- graph.data.frame(sub_tax_from_to, directed=TRUE)
 
 #plot(g)
 
-print_all(g)
+#print_all(g)
 
 # And the subcomponent to filter for all node below Archaeplastida https://igraph.org/r/doc/subcomponent.html
 
@@ -127,7 +143,7 @@ taxonomy_family <- taxonomy_final %>%
 # taxonomy_family_lineage <- tax_lineage(taxonomy_taxon_info(taxonomy_family$uid, include_lineage = TRUE))  
 # saveRDS(taxonomy_family_lineage, file="docs/data/tmp/taxonomy_family_lineage.RData")
 
-taxonomy_family_lineage <- readRDS(file="docs/data/tmp/taxonomy_family_lineage.RData")
+taxonomy_family_lineage <- readRDS(file=config$paths$taxonomy_family_lineage)
 
 
 taxonomy_family_lineage_matt <- ldply(taxonomy_family_lineage,rbind)
@@ -165,14 +181,14 @@ length(unique(taxonomy_family_full$name.family))
 
 ###################### gtoup PF 
 
-PF_d2 <- PF_d[!is.na(PF_d$taxon.ott_id),]
+pf_metadata2 <- pf_metadata[!is.na(pf_metadata$taxon.ott_id),]
 
 # Uncomment the two following line if you need to launch tax_lineage() again
 
-# taxonomy_family_lineage_pf <- tax_lineage(taxonomy_taxon_info(PF_d2$taxon.ott_id, include_lineage = TRUE))  
+# taxonomy_family_lineage_pf <- tax_lineage(taxonomy_taxon_info(pf_metadata2$taxon.ott_id, include_lineage = TRUE))  
  #saveRDS(taxonomy_family_lineage_pf, file="docs/data/tmp/taxonomy_family_lineage_pf.RData")
 
-taxonomy_family_lineage_pf <- readRDS(file="docs/data/tmp/taxonomy_family_lineage_pf.RData")
+taxonomy_family_lineage_pf <- readRDS(file=config$paths$taxonomy_family_lineage_pf)
 
 
 taxonomy_family_lineage_pf_matt <- ldply(taxonomy_family_lineage_pf,rbind)
@@ -316,7 +332,7 @@ taxonomy_genus <- taxonomy_final %>%
 # taxonomy_genus_lineage <- tax_lineage(taxonomy_taxon_info(taxonomy_genus$uid, include_lineage = TRUE))  
 # saveRDS(taxonomy_genus_lineage, file="docs/data/tmp/taxonomy_genus_lineage.RData")
 
-taxonomy_genus_lineage <- readRDS(file="docs/data/tmp/taxonomy_genus_lineage.RData")
+taxonomy_genus_lineage <- readRDS(file=config$paths$taxonomy_genus_lineage)
 
 
 taxonomy_genus_lineage_matt <- ldply(taxonomy_genus_lineage,rbind)
@@ -339,7 +355,7 @@ taxonomy_genus_full$uid <- as.character(taxonomy_genus_full$uid)
 
 # length(unique(taxonomy_genus_full$))
 
-sp_name_matt <- subset(PF_d2,select=c(taxon.ott_id, taxon.name))
+sp_name_matt <- subset(pf_metadata2,select=c(taxon.ott_id, taxon.name))
 sp_name_matt$taxon.ott_id = as.character(sp_name_matt$taxon.ott_id)
 
 taxonomy_pf_merge_sp <-
@@ -375,7 +391,7 @@ ratio_genus <- tapply(Pf_full_merge_taxo$pres,Pf_full_merge_taxo$name,mean,na.rm
 ratio_genus[is.na(ratio_genus)] <- 0
 ratio_genus <-mean(ratio_genus)
 
-ratio_species <- length(unique(PF_d2$taxon.name))/308312 ## number of tracheophyte
+ratio_species <- length(unique(pf_metadata2$taxon.name))/308312 ## number of tracheophyte
 
 Group_coverage <-c(ratio_phy,ratio_order,ratio_fam,ratio_genus,ratio_species)
 group <- c("Phylum","Order","Family","Genus","Species")
@@ -405,7 +421,7 @@ titlex <-  ggplot()+ xlim(0,1) +ylim(0,1) + theme_void() +
  grid.arrange(p1,g1, nrow = 2,widths = c(1,2),
              layout_matrix = rbind(c(1,2), c(1,2)))
 
-pdf(file = "docs/data/outputs/taxo_plot.pdf",   # The directory you want to save the file in
+pdf(file = config$paths$outputs$taxo_plot,   # The directory you want to save the file in
     width = 13, # The width of the plot in inches
     height = 8)
 
@@ -455,7 +471,7 @@ taxo_merger_genus$value <- rep(1,nrow(taxo_merger_genus))
 
 
 
-pdf(file = "docs/data/outputs/family_coverage_plot.pdf",   # The directory you want to save the file in
+pdf(file = config$paths$outputs$family_coverage_plot,   # The directory you want to save the file in
     width = 13, # The width of the plot in inches
     height = 8)
 
@@ -474,7 +490,7 @@ p3
 
 dev.off()
 
-pdf(file = "docs/data/outputs/order_coverage_plot.pdf",   # The directory you want to save the file in
+pdf(file = config$paths$outputs$order_coverage_plot,   # The directory you want to save the file in
     width = 13, # The width of the plot in inches
     height = 8) 
 
@@ -506,16 +522,13 @@ p3_ly$x$labels
 #   htmlwidgets::saveWidget(file="docs/data/outputs/family_coverage_plot.html", selfcontained = FALSE)
 # system('rm -r family_coverage_plot_files')
 
-htmlwidgets::saveWidget(as_widget(p3_ly), "docs/data/outputs/family_coverage_plot.html")
+htmlwidgets::saveWidget(as_widget(p3_ly), config$paths$outputs$family_coverage_html)
 
 
 p4_ly <- ggplotly(p4,dynamicTicks = TRUE,tooltip = c("text"))
 p4_ly <- p4_ly %>%
         layout(legend = list(title=list(text='Presence in dataset')), hoverinfo = 'Family')
 
-# setwd("docs/data/outputs")
-# p4_ly %>% 
-#   htmlwidgets::saveWidget(file="docs/data/outputs/order_coverage_plot.html", selfcontained = TRUE)
-# system('rm -r order_coverage_plot_files')
+htmlwidgets::saveWidget(as_widget(p4_ly), config$paths$outputs$order_coverage_html)
 
-htmlwidgets::saveWidget(as_widget(p4_ly), "docs/data/outputs/order_coverage_plot.html")
+paste()

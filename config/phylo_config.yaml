@@ -1,0 +1,25 @@
+params:
+ download_otl : FALSE # Set to FALSE if you dont want to download the OTT taxonomy
+ download_pf_metadata : FALSE # Set to FALSE if you dont want to download the PF1600 metadata
+
+data:
+ otl_url : http://files.opentreeoflife.org/ott/ott3.3/ott3.3.tgz # This is the url of the OTT taxonomy
+ pf_metadata_url : https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-04-28_pmallard_7c3d8556/other/pf_metadata_otoled.tsv # This is url to fetch the PF1600 metadata 
+
+paths:
+ data : docs/data/
+ inputs : docs/data/inputs/
+ tmp : docs/data/tmp/
+ outputs : docs/data/outputs/
+
+filenames : 
+ otl_local : ott3.3.tgz
+ pf_metadata_local : pf_metadata_otoled.tsv
+ taxonomy_family_lineage_pf : taxonomy_family_lineage_pf.RData
+ taxonomy_family_lineage : taxonomy_family_lineage.RData
+ taxonomy_genus_lineage : taxonomy_genus_lineage.RData
+ taxo_plot : taxo_plot.pdf
+ family_coverage_plot : family_coverage_plot.pdf
+ order_coverage_plot : order_coverage_plot.pdf
+ family_coverage_html : family_coverage_plot.html
+ order_coverage_html : order_coverage_plot.html
