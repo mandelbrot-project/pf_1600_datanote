@@ -69,6 +69,14 @@ conda activate pf_datanote
 Here are the instruction to calculate the phylogenetic coverage of the PF1600 dataset.
 The resulting data is used to generate Figure 1. and the associated barplots
 
+1. Set parameters in the [phylo_congig.yaml](https://github.com/mandelbrot-project/pf_1600_datanote/blob/e23e573e011c498eeb9664337cd1e74229c133d5/config/phylo_config.yaml)
+
+2. Run the [phylogenetic_coverage.R](https://github.com/mandelbrot-project/pf_1600_datanote/blob/e23e573e011c498eeb9664337cd1e74229c133d5/src/phylogenetic_coverage.R) script. Make sure to run it from the repository directory level.
+
+```
+Rscript src/phylogenetic_coverage.R
+```
+
 
 
 
