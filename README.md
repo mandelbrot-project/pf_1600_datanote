@@ -96,16 +96,15 @@ Rscript src/phylogenetic_coverage.R
 * [Blog Post](link)
 
 
-## Contributing DSWG Members
-
-**Team Leads (Contacts) : [Full Name](https://github.com/[github handle])(@slackHandle)**
-
-#### Other Members:
+## Contributing Members
 
 |Name     |  Slack Handle   | 
 |---------|-----------------|
-|[Full Name](https://github.com/[github handle])| @johnDoe        |
-|[Full Name](https://github.com/[github handle]) |     @janeDoe    |
+|[Pierre-Marie Allard](https://github.com/oolonek)| @johnDoe        |
+|[Arnaud Gaudry](https://github.com/ArnaudGaudry) |     @janeDoe    |
+|[Adriano Rutz](https://github.com/Adafede) |     @janeDoe    |
+|[Emmanuel Defossez](https://github.com/Edefossez) |     @janeDoe    |
+
 
 ## Contact
 * If you haven't joined the SF Brigade Slack, [you can do that here](http://c4sf.me/slack).  
