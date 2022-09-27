@@ -3,11 +3,13 @@ channels:
   - conda-forge
   - bioconda
   - defaults
+  - nlesc
   - tmap
 dependencies:
   - python=3.9
   - ipykernel
   - faerun
+  - matchms
   - pandas
   - pip
   - pip:
@@ -17,6 +19,7 @@ dependencies:
   - rdkit
   - requests
   - scipy
+  - spec2vec
   - tmap
   - r-aplot ## needed by ggtree
   - r-base
