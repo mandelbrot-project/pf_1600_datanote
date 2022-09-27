@@ -89,7 +89,6 @@ if (config$params$download_otl == TRUE) {
   download.file(url = config$data$otl_url, destfile = paste0(config$paths$inputs, config$filenames$otl_local), method = "wget", extra = "-r -p --random-wait")
 }
 
-
 # and opened from the tar archive
 
 taxonomy <- read_delim(archive_read(paste0(config$paths$inputs, config$filenames$otl_local), file = "ott3.3/taxonomy.tsv"), col_types = cols(), delim = "|", escape_double = FALSE, trim_ws = TRUE)
@@ -141,12 +140,14 @@ taxonomy_final <- taxonomy[taxonomy$uid %in% id_sel, ]
 taxonomy_family <- taxonomy_final %>%
   filter(rank == "family" & is.na(flags))
 
-# Uncomment the two following line if you need to launch tax_lineage() again
 
-# taxonomy_family_lineage <- tax_lineage(taxonomy_taxon_info(taxonomy_family$uid, include_lineage = TRUE))
-# saveRDS(taxonomy_family_lineage, file="docs/data/tmp/taxonomy_family_lineage.RData")
-
-taxonomy_family_lineage <- readRDS(file = paste0(config$paths$tmp, config$filenames$taxonomy_family_lineage))
+if (config$params$run_tax_lineage == TRUE) {
+  print(paste('Proceeding to tax_lineage() function and saving output as', paste0(config$paths$tmp, config$filenames$taxonomy_family_lineage)))
+  taxonomy_family_lineage <- tax_lineage(taxonomy_taxon_info(taxonomy_family$uid, include_lineage = TRUE))
+  saveRDS(taxonomy_family_lineage, file = paste0(config$paths$tmp, config$filenames$taxonomy_family_lineage))
+} else {
+  taxonomy_family_lineage <- readRDS(file = paste0(config$paths$tmp, config$filenames$taxonomy_family_lineage))
+}
 
 
 taxonomy_family_lineage_matt <- ldply(taxonomy_family_lineage, rbind)
@@ -186,12 +187,13 @@ length(unique(taxonomy_family_full$name.family))
 
 pf_metadata2 <- pf_metadata[!is.na(pf_metadata$taxon.ott_id), ]
 
-# Uncomment the two following line if you need to launch tax_lineage() again
-
-# taxonomy_family_lineage_pf <- tax_lineage(taxonomy_taxon_info(pf_metadata2$taxon.ott_id, include_lineage = TRUE))
-# saveRDS(taxonomy_family_lineage_pf, file="docs/data/tmp/taxonomy_family_lineage_pf.RData")
-
-taxonomy_family_lineage_pf <- readRDS(file = paste0(config$paths$tmp, config$filenames$taxonomy_family_lineage_pf))
+if (config$params$run_tax_lineage == TRUE) {
+  print(paste('Proceeding to tax_lineage() function and saving output as', paste0(config$paths$tmp, config$filenames$taxonomy_family_lineage_pf)))
+  taxonomy_family_lineage_pf <- tax_lineage(taxonomy_taxon_info(pf_metadata2$taxon.ott_id, include_lineage = TRUE))
+  saveRDS(taxonomy_family_lineage_pf, file = paste0(config$paths$tmp, config$filenames$taxonomy_family_lineage_pf))
+} else {
+  taxonomy_family_lineage_pf <- readRDS(file = paste0(config$paths$tmp, config$filenames$taxonomy_family_lineage_pf))
+}
 
 
 taxonomy_family_lineage_pf_matt <- ldply(taxonomy_family_lineage_pf, rbind)
@@ -336,12 +338,14 @@ taxonomy_genus <- taxonomy_final %>%
 
 # length(unique(taxonomy_genus$))
 
-# Uncomment the two following line if you need to launch tax_lineage() again
 
-# taxonomy_genus_lineage <- tax_lineage(taxonomy_taxon_info(taxonomy_genus$uid, include_lineage = TRUE))
-# saveRDS(taxonomy_genus_lineage, file="docs/data/tmp/taxonomy_genus_lineage.RData")
-
-taxonomy_genus_lineage <- readRDS(file = paste0(config$paths$tmp, config$filenames$taxonomy_genus_lineage))
+if (config$params$run_tax_lineage == TRUE) {
+  print(paste('Proceeding to tax_lineage() function and saving output as', paste0(config$paths$tmp, config$filenames$taxonomy_genus_lineage)))
+  taxonomy_genus_lineage <- tax_lineage(taxonomy_taxon_info(taxonomy_genus$uid, include_lineage = TRUE))
+  saveRDS(taxonomy_genus_lineage, file = paste0(config$paths$tmp, config$filenames$taxonomy_genus_lineage))
+} else {
+  taxonomy_genus_lineage <- readRDS(file = paste0(config$paths$tmp, config$filenames$taxonomy_genus_lineage))
+}
 
 
 taxonomy_genus_lineage_matt <- ldply(taxonomy_genus_lineage, rbind)
