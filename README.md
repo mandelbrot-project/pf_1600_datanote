@@ -77,19 +77,10 @@ The resulting data is used to generate Figure 1. and the associated barplots
 Rscript src/phylogenetic_coverage.R
 ```
 
-## Spectral TMAP establishment
+## Spectral TMAP establishment    
 
 
-
-
-
-    
-3. Data processing/transformation scripts are being kept [here](Repo folder containing data processing scripts/notebooks)
-4. etc...
-
-*If your project is well underway and setup is fairly complicated (ie. requires installation of many packages) create another "setup.md" file and link to it here*  
-
-5. Follow setup [instructions](Link to file)
+## Structural TMAP establishment    
 
 
 ## Featured Notebooks/Analysis/Deliverables
