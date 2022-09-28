@@ -39,8 +39,8 @@ tmp_path = 'tmp/'
 dataset_annotations_filename = 'PF_full_datanote_spectral_match_results_repond_flat.tsv'
 dataset_annotations_path = tmp_path + dataset_annotations_filename
 
-Metadata_filename = 'plant_extract_dataset_metadata.tsv'
-Metadata_path = tmp_path + Metadata_filename
+metadata_filename = 'plant_extract_dataset_metadata.tsv'
+metadata_path = tmp_path + metadata_filename
 
 feature_table_filename = '210302_feature_list_filtered_strong_aligned_cosine03_quant_without_QCs_and_Blanks.csv'
 feature_table_path = tmp_path + feature_table_filename
@@ -71,7 +71,7 @@ open(dataset_annotations_path, "wb").write(response.content)
 # Metadata
 URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2021-12-21_pmallard_cde57c76/metadata/211221_metadata_vgf.tsv"
 response = requests.get(URL)
-open(Metadata_path, "wb").write(response.content)
+open(metadata_path, "wb").write(response.content)
 
 # Spectra
 URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-09-14_pmallard_c2fb482f/other/210302_feature_list_filtered_strong_aligned_cosine03_without_QCs_and_Blanks.mgf"
