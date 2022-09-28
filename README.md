@@ -78,10 +78,22 @@ Rscript src/phylogenetic_coverage.R
 ```
 
 ## Spectral TMAP establishment    
-
+Here are the instruction to calculate the TMAP clustering of the features' MS/MS spectra of the PF1600 dataset.
+The resulting data is used to generate Figure 2.
+  
+Run the [structural_tmap.py](https://github.com/mandelbrot-project/pf_1600_datanote/blob/e23e573e011c498eeb9664337cd1e74229c133d5/src/sprectral_tmap.py) script.
+```
+python src/sprectral_tmap.R
+```
 
 ## Structural TMAP establishment    
-
+Here are the instruction to calculate the TMAP clustering of the annotated compounds from the PF1600 dataset.
+The resulting data is used to generate Figure 3.
+  
+Run the [structural_tmap.py](https://github.com/mandelbrot-project/pf_1600_datanote/blob/e23e573e011c498eeb9664337cd1e74229c133d5/src/structural_tmap.py) script.
+```
+python src/structural_tmap.R
+```
 
 ## Featured Notebooks/Analysis/Deliverables
 * [Notebook/Markdown/Slide Deck Title](link)
