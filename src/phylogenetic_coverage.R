@@ -224,6 +224,9 @@ sp_name <- gsub("_.*", "", my_tree$tip.label)
 
 my_tree$tip.label <- sp_name
 
+# The tree is exported at this step 
+
+ape::write.tree(my_tree, file = paste0(config$paths$outputs, config$filenames$tree))
 
 species <- taxonomy_pf_merge$name
 g <- split(species, taxonomy_pf_merge$pres)
@@ -443,10 +446,10 @@ titlex <- ggplot() +
     family = "serif"
   )
 
-grid.arrange(p1, g1,
-  nrow = 2, widths = c(1, 2),
-  layout_matrix = rbind(c(1, 2), c(1, 2))
-)
+# grid.arrange(p1, g1,
+#   nrow = 2, widths = c(1, 2),
+#   layout_matrix = rbind(c(1, 2), c(1, 2))
+# )
 
 pdf(
   file = paste0(config$paths$outputs, config$filenames$taxo_plot), # The directory you want to save the file in
