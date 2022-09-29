@@ -83,7 +83,7 @@ The resulting data is used to generate Figure 2.
   
 Run the [spectral_tmap.py](https://github.com/mandelbrot-project/pf_1600_datanote/blob/e23e573e011c498eeb9664337cd1e74229c133d5/src/spectral_tmap.py) script.
 ```
-python src/spectral_tmap.R
+python src/spectral_tmap.py
 ```
 
 ## Structural TMAP establishment    
@@ -92,7 +92,7 @@ The resulting data is used to generate Figure 3.
   
 Run the [structural_tmap.py](https://github.com/mandelbrot-project/pf_1600_datanote/blob/e23e573e011c498eeb9664337cd1e74229c133d5/src/structural_tmap.py) script.
 ```
-python src/structural_tmap.R
+python src/structural_tmap.py
 ```
 
 ## Featured Notebooks/Analysis/Deliverables
