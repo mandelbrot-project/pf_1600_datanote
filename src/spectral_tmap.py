@@ -61,8 +61,8 @@ tmap_filename = '220427_VGF_samples_spectral_tmap_pos'
 output_folder = 'docs/'
 image_output_folder = 'docs/img/'
 
-#downloading required inputs
-
+# downloading required inputs
+print('download data')
 # ISDB annotations
 URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-04-28_pmallard_b0e0f70c/other/PF_full_datanote/PF_full_datanote_spectral_match_results_repond_flat.tsv"
 response = requests.get(URL)
@@ -96,6 +96,7 @@ os.remove(path_to_file)
 #########################################################
 ###               PART 1: IMPORT DATA                 ###
 #########################################################
+print('import data')
 
 # Spectra processing function
 def apply_my_filters(s):
@@ -108,7 +109,7 @@ def apply_my_filters(s):
     return s
 
 # Load samples metadata
-optional_meta = pd.read_csv(Metadata_path, sep = '\t', usecols=[
+optional_meta = pd.read_csv(metadata_path, sep = '\t', usecols=[
     'sample_id', 'organism_phylum', 'organism_class', 'organism_order', 'organism_family',\
     'organism_genus', 'organism_species'
 ])
@@ -185,6 +186,7 @@ for doc in reference_documents:
 #########################################################
 ###             PART 2: SPECTRAL T-MAP                ###
 #########################################################
+print('build tmap')
 
 # (Dirty) trick to pass from a counter object to a list
 ctr = Counter()
@@ -224,12 +226,13 @@ x, y, s, t, _ = tm.layout_from_lsh_forest(lf, config=config)
 
 
 # Save for further use
+cord_path = tmp_path + '220419_pf_set_pectral_coord.dat'
 x = list(x)
 y = list(y)
 s = list(s)
 t = list(t)
 pickle.dump(
-    (x, y, s, t), open("220419_pf_set_pectral_coord.dat", "wb+"), protocol=pickle.HIGHEST_PROTOCOL
+    (x, y, s, t), open(cord_path, "wb+"), protocol=pickle.HIGHEST_PROTOCOL
 )
 
 del (lf)
@@ -417,6 +420,10 @@ metadata_df["label_smiles"] = (
     )
 
 # Plotting the spectral t-map
+print('plot tmap')
+
+os.chdir(os.path.join(os.getcwd(), image_output_folder))
+
 f = Faerun(view="front", coords=False, clear_color='#FFFFFF')
 f.add_scatter(
         "attributes",
@@ -545,6 +552,6 @@ f.add_tree("tree",
            point_helper="attributes",
            color='#a89e9e'
            )
-f.plot(output_folder + tmap_filename,
+f.plot(tmap_filename,
        template="smiles"
 )

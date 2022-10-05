@@ -102,6 +102,7 @@ output_folder = 'docs/'
 image_output_folder = 'docs/img/'
 
 #downloading required inputs
+print("download data")
 
 URL = "https://zenodo.org/record/6378204/files/220318_frozen_metadata.csv.gz"
 response = requests.get(URL)
@@ -116,6 +117,7 @@ open(dataset_annotations_path, "wb").write(response.content)
 ########################################################
 ### PART 1: LOAD Lotus and transform for plotting ###
 ########################################################
+print("load data")
 
 # Load lotus
 df_meta = pd.read_csv(
@@ -258,6 +260,7 @@ cmap4 = mcolors.ListedColormap(list_hex)
 ########################################################
 # OPTION 1: START FROM SCRATCH AND GENERATE LSH FOREST AND TMAP FROM SMILES, PLUS CHEMICAL DESCRIPTORS
 ########################################################
+print("build tmap")
 
 MAP4 = MAP4Calculator(dimensions=1024)
 # ENC = tm.Minhash(1024)
@@ -387,7 +390,12 @@ hac, c_frac, ring_atom_frac, largest_ring_size = pickle.load(
 ########################################################
 # COMMON PART: PLOT THE TMAP
 ########################################################
+print("plot tmap")
+
 c_frak_ranked = ss.rankdata(np.array(c_frac) / max(c_frac)) / len(c_frac)
+
+parent = os.getcwd()
+os.chdir(os.path.join(os.getcwd(), image_output_folder))
 
 # Plotting function
 f = Faerun(view="front", coords=False, clear_color='#ffffff')
@@ -427,8 +435,9 @@ f.add_scatter(
     has_legend=True
 )
 f.add_tree("annotation_tree", {"from": s, "to": t}, point_helper="attributes", color='#e6e6e6')
-f.plot(output_folder + tmap_filename, template="smiles")
+f.plot(tmap_filename, template="smiles")
 
+os.chdir(parent)
 
 ### Bar Chart
 
