@@ -58,6 +58,7 @@ cd pf_1600_datanote
 ```
 
 2. Install and activate the Conda environment from the environment.yml file 
+TMAP package is only avaialble on MacOS and Linux. If you are using Windows, you can use WSL.
 
 ```
 conda env create --file environment.yml
