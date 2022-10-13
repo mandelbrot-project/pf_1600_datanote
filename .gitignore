@@ -6,7 +6,5 @@
 *.pptx
 *.cdx
 *.tgz
-tmp
-tmp_bkp
 .DS_Store
 .vscode
