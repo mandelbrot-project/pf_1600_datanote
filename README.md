@@ -57,7 +57,7 @@ git clone https://github.com/mandelbrot-project/pf_1600_datanote.git
 cd pf_1600_datanote
 ```
 
-2. Install and activate the Conda environment from the environment.yml file. The TMAP package is only available on MacOS and Linux. If you are using Windows, you can use WSL.
+2. Install and activate the Conda environment from the environment.yml file. The [TMAP package](https://github.com/reymond-group/tmap) is only available on MacOS and Linux. If you are using Windows, you can use WSL.
 
 ```
 conda env create --file environment.yml
