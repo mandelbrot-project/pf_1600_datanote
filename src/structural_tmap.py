@@ -15,6 +15,10 @@ from map4 import MAP4Calculator
 from rdkit.Chem import AllChem
 import requests
 
+import tqdm
+from tqdm.contrib import tzip
+
+
 # Define useful functions:
 
 def Top_N_classes(N=0, input_data=[], input_labels=[]):
@@ -93,27 +97,36 @@ lf_store_path = tmp_path + '20220428_pf_set_annotation_vs_lotus.dat'
 set_attributes_path = tmp_path + "20220428_pf_set_annotation_vs_lotus_attributes.pickle"
 set_coordinates_path = tmp_path + "20220428_pf_set_annotation_vs_lotus_coords.dat"
 
-tmap_filename = '20220428_annotations_vs_lotus_tmap'
+tmap_filename = 'pf1600_structural_tmap'
 
 # outputs folder
 
 output_folder = 'docs/'
 
-bplot_output_folder = 'docs/data/outputs/structural/barplot'
-tmap_output_folder = 'docs/data/outputs/structural/tmap'
-
-#downloading required inputs
-print("download data")
-
-# you can view all versions at 10.5281/zenodo.5794106 (adapt accordingly to your needs)
-URL = "https://zenodo.org/record/6378204/files/220318_frozen_metadata.csv.gz" 
-response = requests.get(URL)
-open(lotus_annotations_path, "wb").write(response.content)
+bplot_output_folder = 'docs/data/outputs/structural/barplot/'
+tmap_output_folder = 'docs/data/outputs/structural/tmap/'
 
 
-URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-04-28_pmallard_b0e0f70c/other/PF_full_datanote/PF_full_datanote_spectral_match_results_repond_flat.tsv"
-response = requests.get(URL)
-open(dataset_annotations_path, "wb").write(response.content)
+
+# do you want do download all the files (true) or do you have them locally (false)
+
+download_option = False
+
+
+if download_option == True:
+    
+    #downloading required inputs
+    print("download data")
+
+    # you can view all versions at 10.5281/zenodo.5794106 (adapt accordingly to your needs)
+    URL = "https://zenodo.org/record/6378204/files/220318_frozen_metadata.csv.gz" 
+    response = requests.get(URL)
+    open(lotus_annotations_path, "wb").write(response.content)
+
+
+    URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-04-28_pmallard_b0e0f70c/other/PF_full_datanote/PF_full_datanote_spectral_match_results_repond_flat.tsv"
+    response = requests.get(URL)
+    open(dataset_annotations_path, "wb").write(response.content)
 
 
 ########################################################
@@ -264,83 +277,83 @@ cmap4 = mcolors.ListedColormap(list_hex)
 ########################################################
 print("build tmap")
 
-MAP4 = MAP4Calculator(dimensions=1024)
-# ENC = tm.Minhash(1024)
+# MAP4 = MAP4Calculator(dimensions=1024)
+# # ENC = tm.Minhash(1024)
 
-# enc = MHFPEncoder(1024)
-lf = tm.LSHForest(1024, 64)
+# # enc = MHFPEncoder(1024)
+# lf = tm.LSHForest(1024, 64)
 
-fps = []
-hac = []
-c_frac = []
-ring_atom_frac = []
-largest_ring_size = []
+# fps = []
+# hac = []
+# c_frac = []
+# ring_atom_frac = []
+# largest_ring_size = []
 
-n_iter = len(df_merged)
-for i, row in df_merged.iterrows():
-    j = (i + 1) / n_iter
-    sys.stdout.write('\r')
-    sys.stdout.write(f"[{'=' * int(50 * j):{50}s}] {round((100 * j), 2)}%")
-    sys.stdout.flush()
-    sleep(0.0005)
+# n_iter = len(df_merged)
+# for i, row in df_merged.iterrows():
+#     j = (i + 1) / n_iter
+#     sys.stdout.write('\r')
+#     sys.stdout.write(f"[{'=' * int(50 * j):{50}s}] {round((100 * j), 2)}%")
+#     sys.stdout.flush()
+#     sleep(0.0005)
 
-    mol = AllChem.MolFromSmiles(row["structure_smiles_2D"])
-    atoms = mol.GetAtoms()
-    size = mol.GetNumHeavyAtoms()
-    n_c = 0
-    n_ring_atoms = 0
-    for atom in atoms:
-        if atom.IsInRing():
-            n_ring_atoms += 1
-        if atom.GetSymbol().lower() == "c":
-            n_c += 1
+#     mol = AllChem.MolFromSmiles(row["structure_smiles_2D"])
+#     atoms = mol.GetAtoms()
+#     size = mol.GetNumHeavyAtoms()
+#     n_c = 0
+#     n_ring_atoms = 0
+#     for atom in atoms:
+#         if atom.IsInRing():
+#             n_ring_atoms += 1
+#         if atom.GetSymbol().lower() == "c":
+#             n_c += 1
 
-    c_frac.append(n_c / size if size != 0 else 0)
+#     c_frac.append(n_c / size if size != 0 else 0)
 
-    ring_atom_frac.append(n_ring_atoms / size if size != 0 else 0)
+#     ring_atom_frac.append(n_ring_atoms / size if size != 0 else 0)
 
-    sssr = AllChem.GetSymmSSSR(mol)
-    if len(sssr) > 0:
-        largest_ring_size.append(max([len(s) for s in sssr]))
-    else:
-        largest_ring_size.append(0)
-    hac.append(size)
-    fps.append(mol)
+#     sssr = AllChem.GetSymmSSSR(mol)
+#     if len(sssr) > 0:
+#         largest_ring_size.append(max([len(s) for s in sssr]))
+#     else:
+#         largest_ring_size.append(0)
+#     hac.append(size)
+#     fps.append(mol)
 
-fps = MAP4.calculate_many(fps)
-lf.batch_add(fps)
-lf.index()
+# fps = MAP4.calculate_many(fps)
+# lf.batch_add(fps)
+# lf.index()
 
-# Store lsh forest and structure metadata
-lf.store(lf_store_path)
-with open(set_attributes_path, "wb+") as f:
-    pickle.dump(
-        (hac, c_frac, ring_atom_frac, largest_ring_size),
-        f,
-        protocol=pickle.HIGHEST_PROTOCOL,
-    )
+# # Store lsh forest and structure metadata
+# lf.store(lf_store_path)
+# with open(set_attributes_path, "wb+") as f:
+#     pickle.dump(
+#         (hac, c_frac, ring_atom_frac, largest_ring_size),
+#         f,
+#         protocol=pickle.HIGHEST_PROTOCOL,
+#     )
 
-# tmap configuration
-cfg = tm.LayoutConfiguration()
-cfg.k = 20
-cfg.sl_extra_scaling_steps = 10
-cfg.node_size = 1 / 50
-cfg.mmm_repeats = 2
-cfg.sl_repeats = 2
+# # tmap configuration
+# cfg = tm.LayoutConfiguration()
+# cfg.k = 20
+# cfg.sl_extra_scaling_steps = 10
+# cfg.node_size = 1 / 50
+# cfg.mmm_repeats = 2
+# cfg.sl_repeats = 2
 
-# tmap generation
-x, y, s, t, _ = tm.layout_from_lsh_forest(lf, cfg)
+# # tmap generation
+# x, y, s, t, _ = tm.layout_from_lsh_forest(lf, cfg)
 
-# To store coordinates
-x = list(x)
-y = list(y)
-s = list(s)
-t = list(t)
-pickle.dump(
-    (x, y, s, t), open(set_coordinates_path, "wb+"), protocol=pickle.HIGHEST_PROTOCOL
-)
+# # To store coordinates
+# x = list(x)
+# y = list(y)
+# s = list(s)
+# t = list(t)
+# pickle.dump(
+#     (x, y, s, t), open(set_coordinates_path, "wb+"), protocol=pickle.HIGHEST_PROTOCOL
+# )
 
-del (lf)
+# del (lf)
 
 ########################################################
 # OPTION 2: LOAD PRE_COMPUTED LSH FOREST AND CHEMICAL DESCRIPTORS
@@ -510,35 +523,44 @@ fig.write_image(bplot_output_folder + "barchart_3.jpg")
 
 # All chemical classes
 
-# np_class_levels = ['structure_taxonomy_npclassifier_01pathway', 'structure_taxonomy_npclassifier_02superclass', 'structure_taxonomy_npclassifier_03class']
-# np_class_levels_names = ['pathway', 'superclass', 'class']
+np_class_levels = ['structure_taxonomy_npclassifier_01pathway', 'structure_taxonomy_npclassifier_02superclass', 'structure_taxonomy_npclassifier_03class']
+np_class_levels_names = ['pathway', 'superclass', 'class']
 
+for (x,y) in tzip(np_class_levels, np_class_levels_names):
 
-level_chemo = 'structure_taxonomy_npclassifier_01pathway'
-df_for_plot = df_merged[[level_chemo, 'is_annotated', 'structure_smiles_2D']]
+    level_chemo = x
+    df_for_plot = df_merged[[level_chemo, 'is_annotated', 'structure_smiles_2D']]
 
-df_for_plot = df_for_plot[df_for_plot[level_chemo] != 'Unknown']
-df_for_plot['is_annotated'] = np.where(df_for_plot['is_annotated'] == 'yes', 1, 0)
+    df_for_plot = df_for_plot[df_for_plot[level_chemo] != 'Unknown']
+    df_for_plot['is_annotated'] = np.where(df_for_plot['is_annotated'] == 'yes', 1, 0)
 
-df_for_plot = df_for_plot.groupby(level_chemo).agg(
-    {'structure_smiles_2D': 'count',
-     'is_annotated': 'sum',
-    })
+    df_for_plot = df_for_plot.groupby(level_chemo).agg(
+        {'structure_smiles_2D': 'count',
+        'is_annotated': 'sum',
+        })
 
-df_for_plot.sort_values(['is_annotated'], ascending=False, inplace=True)
-df_for_plot['structure_smiles_2D'] = df_for_plot['structure_smiles_2D'] - df_for_plot['is_annotated']
-fig = go.Figure(data=[
-    go.Bar(name='Annotation', x=df_for_plot.index, y=df_for_plot.is_annotated, marker_color='#0a9396'),
-    go.Bar(name='Total', x=df_for_plot.index, y=df_for_plot.structure_smiles_2D, marker_color='#0a9396', opacity =0.4)
-])
-# Change the bar mode
-fig.update_layout(
-    barmode='stack', template='simple_white', width=1500, height=1000,
-    yaxis_title="Count",
-    # font=dict(
-    #     size=40,
-    # )
-    )
-fig.show()
-fig.write_html(bplot_output_folder + "barchart_pathway.html")
+    df_for_plot.sort_values(['is_annotated'], ascending=False, inplace=True)
+    df_for_plot['structure_smiles_2D'] = df_for_plot['structure_smiles_2D'] - df_for_plot['is_annotated']
+    fig = go.Figure(data=[
+        go.Bar(name='Annotated in the pf1600 dataset', x=df_for_plot.index, y=df_for_plot.is_annotated, marker_color='#0a9396'),
+        go.Bar(name='Total in LOTUS', x=df_for_plot.index, y=df_for_plot.structure_smiles_2D, marker_color='#0a9396', opacity =0.4)
+    ])
+    # Change the bar mode
+    fig.update_layout(
+        barmode='stack', template='simple_white', width=1500, height=1000,
+        yaxis_title="Count",
+        # font=dict(
+        #     size=40,
+        # )
+        )
+    fig.update_layout(
+    title={
+        'text': "Proportion of annotated structures at the " + y + " level.",
+        'y':0.9,
+        'x':0.5,
+        'xanchor': 'center',
+        'yanchor': 'top'})
+    
+    fig.show()
+    fig.write_html(bplot_output_folder + "barchart_" + y + ".html")
 

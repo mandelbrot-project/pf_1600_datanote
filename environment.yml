@@ -16,6 +16,7 @@ dependencies:
     - git+https://github.com/reymond-group/map4
   - matplotlib
   - plotly
+  - python-kaleido
   - rdkit
   - requests
   - scipy

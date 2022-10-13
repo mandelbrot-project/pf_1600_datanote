@@ -59,7 +59,7 @@ tmap_filename = 'pf1600_spectral_tmap_pos'
 # outputs folder
 
 output_folder = 'docs/'
-tmap_output_folder = 'docs/data/outputs/tmap/spectral'
+tmap_output_folder = 'docs/data/outputs/spectral/tmap'
 
 # do you want do download all the files (true) or do you have them locally (false)
 
