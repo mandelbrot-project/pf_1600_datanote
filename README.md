@@ -95,20 +95,15 @@ Run the [structural_tmap.py](https://github.com/mandelbrot-project/pf_1600_datan
 python src/structural_tmap.py
 ```
 
-## Featured Notebooks/Analysis/Deliverables
-* [Notebook/Markdown/Slide Deck Title](link)
-* [Notebook/Markdown/Slide DeckTitle](link)
-* [Blog Post](link)
-
 
 ## Contributing Members
 
-|Name     |  Slack Handle   | 
+|Name     |  Twitter Handle   | 
 |---------|-----------------|
-|[Pierre-Marie Allard](https://github.com/oolonek)| @johnDoe        |
-|[Arnaud Gaudry](https://github.com/ArnaudGaudry) |     @janeDoe    |
-|[Adriano Rutz](https://github.com/Adafede) |     @janeDoe    |
-|[Emmanuel Defossez](https://github.com/Edefossez) |     @janeDoe    |
+|[Pierre-Marie Allard](https://github.com/oolonek)| @allard_pm        |
+|[Arnaud Gaudry](https://github.com/ArnaudGaudry) |     @gaudarn    |
+|[Adriano Rutz](https://github.com/Adafede) |     @Adafede    |
+|[Emmanuel Defossez](https://github.com/Edefossez) |     @ManuDefossez    |
 
 
 ## Contact

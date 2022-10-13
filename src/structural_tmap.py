@@ -99,12 +99,14 @@ tmap_filename = '20220428_annotations_vs_lotus_tmap'
 
 output_folder = 'docs/'
 
-image_output_folder = 'docs/img/'
+bplot_output_folder = 'docs/data/outputs/structural/barplot'
+tmap_output_folder = 'docs/data/outputs/structural/tmap'
 
 #downloading required inputs
 print("download data")
 
-URL = "https://zenodo.org/record/6378204/files/220318_frozen_metadata.csv.gz"
+# you can view all versions at 10.5281/zenodo.5794106 (adapt accordingly to your needs)
+URL = "https://zenodo.org/record/6378204/files/220318_frozen_metadata.csv.gz" 
 response = requests.get(URL)
 open(lotus_annotations_path, "wb").write(response.content)
 
@@ -395,7 +397,7 @@ print("plot tmap")
 c_frak_ranked = ss.rankdata(np.array(c_frac) / max(c_frac)) / len(c_frac)
 
 parent = os.getcwd()
-os.chdir(os.path.join(os.getcwd(), image_output_folder))
+os.chdir(os.path.join(os.getcwd(), tmap_output_folder))
 
 # Plotting function
 f = Faerun(view="front", coords=False, clear_color='#ffffff')
@@ -486,7 +488,7 @@ fig.update_layout(
 
 fig.update_xaxes(tickfont = dict(size=40))
 fig.show()
-fig.write_image(image_output_folder + "barchart_2.jpg")
+fig.write_image(bplot_output_folder + "barchart_2.jpg")
 
 
 # Version 2
@@ -504,9 +506,13 @@ fig.update_layout(
         size=40,
     ))
 fig.show()
-fig.write_image(image_output_folder + "barchart_3.jpg")
+fig.write_image(bplot_output_folder + "barchart_3.jpg")
 
 # All chemical classes
+
+# np_class_levels = ['structure_taxonomy_npclassifier_01pathway', 'structure_taxonomy_npclassifier_02superclass', 'structure_taxonomy_npclassifier_03class']
+# np_class_levels_names = ['pathway', 'superclass', 'class']
+
 
 level_chemo = 'structure_taxonomy_npclassifier_01pathway'
 df_for_plot = df_merged[[level_chemo, 'is_annotated', 'structure_smiles_2D']]
@@ -534,5 +540,5 @@ fig.update_layout(
     # )
     )
 fig.show()
-fig.write_html(output_folder + "barchart_pathway.html")
+fig.write_html(bplot_output_folder + "barchart_pathway.html")
 

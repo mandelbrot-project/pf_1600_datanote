@@ -11,7 +11,7 @@ paths:
  data : docs/data/
  inputs : docs/data/inputs/
  tmp : docs/data/tmp/
- outputs : docs/data/outputs/
+ outputs : docs/data/outputs/phylo/
 
 filenames : 
  otl_local : ott3.3.tgz

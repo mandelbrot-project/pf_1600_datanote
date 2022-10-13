@@ -52,46 +52,61 @@ component_index_filename = 'gnps_job/clusterinfosummarygroup_attributes_withIDs_
 component_index_path = tmp_path + component_index_filename
 
 # tmap outputs
-set_coordinates_path = tmp_path + "220419_pf_set_pectral_coord.dat"
+set_coordinates_path = tmp_path + "pf_set_spectral_coord.dat"
 
-tmap_filename = '220427_VGF_samples_spectral_tmap_pos'
+tmap_filename = 'pf1600_spectral_tmap_pos'
 
 # outputs folder
 
 output_folder = 'docs/'
-image_output_folder = 'docs/img/'
+tmap_output_folder = 'docs/data/outputs/tmap/spectral'
 
-# downloading required inputs
-print('download data')
-# ISDB annotations
-URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-04-28_pmallard_b0e0f70c/other/PF_full_datanote/PF_full_datanote_spectral_match_results_repond_flat.tsv"
-response = requests.get(URL)
-open(dataset_annotations_path, "wb").write(response.content)
+# do you want do download all the files (true) or do you have them locally (false)
 
-# Metadata
-URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2021-12-21_pmallard_cde57c76/metadata/211221_metadata_vgf.tsv"
-response = requests.get(URL)
-open(metadata_path, "wb").write(response.content)
+download_option = False
 
-# Spectra
-URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-09-14_pmallard_c2fb482f/other/210302_feature_list_filtered_strong_aligned_cosine03_without_QCs_and_Blanks.mgf"
-response = requests.get(URL)
-open(spectra_path, "wb").write(response.content)
 
-# Feature table
-URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-09-14_pmallard_c2fb482f/other/210302_feature_list_filtered_strong_aligned_cosine03_quant_without_QCs_and_Blanks.csv"
-response = requests.get(URL)
-open(feature_table_path, "wb").write(response.content)
+if download_option == True:
 
-# Componentindex
-path_to_file = tmp_path + 'gnps_job.zip'
-path_to_folder = tmp_path + 'gnps_job/'
-job_url_zip = "https://gnps.ucsd.edu/ProteoSAFe/DownloadResult?task="+"3197f70bed224f9ba6f59f62906839e9"+"&view=download_cytoscape_data"
-cmd = 'curl -d "" ' + job_url_zip + ' -o '+ path_to_file + ' --create-dirs'
-subprocess.call(shlex.split(cmd))
-with zipfile.ZipFile(path_to_file, 'r') as zip_ref:
-    zip_ref.extractall(path_to_folder)
-os.remove(path_to_file)
+    # downloading required inputs
+    print('download data')
+
+    print('Downloading ISDB annotations ...')
+    # ISDB annotations
+    URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-04-28_pmallard_b0e0f70c/other/PF_full_datanote/PF_full_datanote_spectral_match_results_repond_flat.tsv"
+    response = requests.get(URL)
+    open(dataset_annotations_path, "wb").write(response.content)
+
+    print('Downloading sample Metadata ...')
+    # Metadata
+    URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2021-12-21_pmallard_cde57c76/metadata/211221_metadata_vgf.tsv"
+    response = requests.get(URL)
+    open(metadata_path, "wb").write(response.content)
+
+    print('Downloading sample Spectra ...')
+    # Spectra
+    URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-09-14_pmallard_c2fb482f/other/210302_feature_list_filtered_strong_aligned_cosine03_without_QCs_and_Blanks.mgf"
+    response = requests.get(URL)
+    open(spectra_path, "wb").write(response.content)
+
+    print('Downloading sample Feature table ...')
+    # Feature table
+    URL = "https://massive.ucsd.edu/ProteoSAFe/DownloadResultFile?file=f.MSV000087728/updates/2022-09-14_pmallard_c2fb482f/other/210302_feature_list_filtered_strong_aligned_cosine03_quant_without_QCs_and_Blanks.csv"
+    response = requests.get(URL)
+    open(feature_table_path, "wb").write(response.content)
+
+
+    print('Downloading Dataset Molecular Network ...')
+    # Componentindex
+    path_to_file = tmp_path + 'gnps_job.zip'
+    path_to_folder = tmp_path + 'gnps_job/'
+    job_url_zip = "https://gnps.ucsd.edu/ProteoSAFe/DownloadResult?task="+"3197f70bed224f9ba6f59f62906839e9"+"&view=download_cytoscape_data"
+    cmd = 'curl -d "" ' + job_url_zip + ' -o '+ path_to_file + ' --create-dirs'
+    subprocess.call(shlex.split(cmd))
+    with zipfile.ZipFile(path_to_file, 'r') as zip_ref:
+        zip_ref.extractall(path_to_folder)
+    os.remove(path_to_file)
+
 
 #########################################################
 ###               PART 1: IMPORT DATA                 ###
@@ -226,7 +241,7 @@ x, y, s, t, _ = tm.layout_from_lsh_forest(lf, config=config)
 
 
 # Save for further use
-cord_path = tmp_path + '220419_pf_set_pectral_coord.dat'
+cord_path = tmp_path + 'pf_set_spectral_coord.dat'
 x = list(x)
 y = list(y)
 s = list(s)
@@ -238,7 +253,7 @@ pickle.dump(
 del (lf)
 
 # Load precomputed coordinates
-# x, y, s, t = pickle.load(open("220419_pf_set_pectral_coord.dat",
+# x, y, s, t = pickle.load(open("pf_set_spectral_coord.dat",
 #                               "rb"))
 
 
@@ -422,7 +437,7 @@ metadata_df["label_smiles"] = (
 # Plotting the spectral t-map
 print('plot tmap')
 
-os.chdir(os.path.join(os.getcwd(), image_output_folder))
+os.chdir(os.path.join(os.getcwd(), tmap_output_folder))
 
 f = Faerun(view="front", coords=False, clear_color='#FFFFFF')
 f.add_scatter(
