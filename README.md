@@ -1,6 +1,7 @@
 # Scripts for the PF1600 project
 
-This repository gathers scripts used for the paper _"Open and re-usable annotated mass spectrometry dataset of a chemodiverse collection of 1,600 plant extracts."_  
+This repository gathers scripts used for the paper _"Open and re-usable annotated mass spectrometry dataset of a chemodiverse collection of 1,600 plant extracts."_ 
+Associated dataset available at http://dx.doi.org/10.5524/102323.
 
 #### -- Project Status: [Active]
 
