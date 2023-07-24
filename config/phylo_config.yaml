@@ -1,6 +1,6 @@
 params:
  download_otl : TRUE # Once downloaded, you can set to FALSE if you dont want to download the OTT taxonomy again and use the local file instead
- download_pf_metadata : TRUE # Once downloaded, you can set to FALSE if you dont want to download the PF1600 metadata again and use the local file instead
+ download_pf_metadata : FALSE # Once downloaded, you can set to FALSE if you dont want to download the PF1600 metadata again and use the local file instead
  run_tax_lineage : TRUE # Once run a first time, you can set to FALSE if you want to use the local files instead. Be patient for the first iteration !
 
 data:
@@ -11,11 +11,11 @@ paths:
  data : docs/data/
  inputs : docs/data/inputs/
  tmp : docs/data/tmp/
- outputs : docs/data/outputs/phylo/
+ outputs : docs/data/outputs/phylo_lq/
 
 filenames : 
  otl_local : ott3.3.tgz
- pf_metadata_local : pf_metadata_otoled.tsv
+ pf_metadata_local : Inmuno_metadata_otoled.tsv
  taxonomy_family_lineage_pf : taxonomy_family_lineage_pf.RData
  taxonomy_family_lineage : taxonomy_family_lineage.RData
  taxonomy_genus_lineage : taxonomy_genus_lineage.RData
